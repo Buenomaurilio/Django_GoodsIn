@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .form-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .form-container h2 {
+    margin-bottom: 20px;
+  }
+
+  .form-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .form-container input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .form-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .form-buttons button,
+  .form-buttons a {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .form-buttons button:hover,
+  .form-buttons a:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<div class="form-container">
+  <h2>Add Checker</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label for="id_name">Name:</label>
+    {{ form.name }}
+    <div class="form-buttons">
+      <button type="submit">Add</button>
+      <a href="{% url 'appointment_list' %}">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+
+{% comment %} {% extends 'base.html' %}
+
+{% block content %}
+<style>
+  .form-container {
+    width: 400px;
+    margin: 40px auto;
+    background-color: #f9f9f9;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  .form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .form-container form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-container label {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .form-container input[type="text"],
+  .form-container select {
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .form-container button {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .form-container a {
+    text-align: center;
+    display: block;
+    margin-top: 15px;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .form-container a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="form-container">
+  <h2>Add Checker</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add</button>
+  </form>
+  <a href="{% url 'appointment_list' %}">Back to Appointments</a>
+</div>
+{% endblock %}
+
+
+
+{% comment %} {% extends 'base.html' %}
+{% block content %}
+<h2>Add Checker</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add</button>
+    <a href="{% url 'appointment_list' %}">Back</a>
+</form>
+{% endblock %} {% endcomment %}

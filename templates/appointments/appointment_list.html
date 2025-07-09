@@ -1,0 +1,656 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .left-section,
+  .right-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .center-section {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .right-section > div {
+    background: #f1f1f1;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .btn {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  td a {
+    text-decoration: none;
+    color: #007bff;
+  }
+
+  td .false {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+
+<div class="top-bar">
+  <!-- Seção esquerda com filtro de data e botão Add Checker -->
+  <div class="left-section">
+    <form method="get" style="display: flex; align-items: center; gap: 8px;">
+      <label for="date">Filter by date:</label>
+      <input type="date" id="date" name="date" value="{{ request.GET.date }}">
+      <button type="submit" class="btn">Filter</button>
+      <a href="{% url 'appointment_list' %}" class="btn">Clear</a>
+    </form>
+    <a href="{% url 'add_checker' %}" class="btn">Add Checker</a>
+  </div>
+
+  <!-- Título centralizado -->
+  <div class="center-section">Appointments</div>
+
+  <!-- Seção direita com botão Add e contagens -->
+  <div class="right-section">
+    <a href="{% url 'add_appointment' %}" class="btn">Add Load</a>
+    <div><strong>Trucks:</strong> {{ appointments|length }}</div>
+    <div>Morning shift: {{ morning_count }} trucks / {{ morning_pallets }} pallets</div>
+    <div>Back shift: {{ back_count }} trucks / {{ back_pallets }} pallets</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>P.O</th>
+      <th>Qty</th>
+      <th>Hall</th>
+      <th>Tipped</th>
+      <th>Checked</th>
+      <th>Checker</th>
+      <th>Arrival</th>
+      <th>Checkout</th>
+      <th>Bay</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.id }}</td>
+      <td>{{ appt.description }}</td>
+      <td>{{ appt.scheduled_date|date:"d/m/Y" }}</td>
+      <td>{{ appt.scheduled_time|time:"H:i" }}</td>
+      <td>{{ appt.po }}</td>
+      <td>{{ appt.qtd_pallet }}</td>
+      <td>{{ appt.hall }}</td>
+      <td style="color: {% if appt.tipped %}green{% else %}red{% endif %};">
+        {% if appt.tipped %}Yes{% else %}No{% endif %}
+      </td>
+      <td style="color: {% if appt.checked %}green{% else %}red{% endif %};">
+        {% if appt.checked %}Yes{% else %}No{% endif %}
+      </td>
+      <td>{{ appt.checker }}</td>
+      <td>{{ appt.arrival_time|time:"H:i" }}</td>
+      <td>{{ appt.check_out_time|time:"H:i" }}</td>
+      <td>{{ appt.bay1 }}</td>
+      <td><a href="{% url 'edit_appointment' appt.id %}">Edit</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="14">No appointments found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+
+  .top-bar form,
+  .top-bar .add-button,
+  .top-bar .summary-box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .top-bar .title {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0 20px;
+  }
+
+  .summary-box {
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  td a {
+    text-decoration: none;
+    color: #007bff;
+  }
+</style>
+
+<div class="top-bar">
+  <!-- Filtro -->
+  <form method="get">
+    <label for="date">Filter by date:</label>
+    <input type="date" id="date" name="date" value="{{ data_filter }}">
+    <button type="submit">Filter</button>
+    <a href="{% url 'appointment_list' %}">Clear</a>
+  </form>
+
+  <!-- Título -->
+  <div class="title">Appointments</div>
+
+  <!-- Botão Add -->
+  <div class="add-button">
+    <a href="{% url 'add_appointment' %}">
+      <button>Add</button>
+    </a>
+  </div>
+
+  <!-- Resumo -->
+  <div class="summary-box">
+    Loads: <strong>{{ total_appointments }}</strong>
+  </div>
+
+  <div class="summary-box">
+    Morning shift: {{ morning_count }} Trucks / {{ morning_pallets }} pallets
+  </div>
+
+  <div class="summary-box">
+    Back shift: {{ back_count }} Trucks / {{ back_pallets }} pallets
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>P.O</th>
+      <th>Qty</th>
+      <th>Hall</th>
+      <th>Tipped</th>
+      <th>Checked</th>
+      <th>Checker</th>
+      <th>Arrival</th>
+      <th>Checkout</th>
+      <th>Bay</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.id }}</td>
+      <td>{{ appt.description }}</td>
+      {% comment %} <td>{{ appt.scheduled_date }}</td> {% endcomment %}
+      {% comment %} <td>{{ appt.scheduled_date|date:"d/m/Y" }}</td>
+      <td>{{ appt.scheduled_time|time:"H:i" }}</td>
+      <td>{{ appt.po }}</td>
+      <td>{{ appt.qtd_pallet }}</td>
+      <td>{{ appt.hall }}</td>
+      <td style="color: {% if appt.tipped %}green{% else %}red{% endif %};">
+        {% if appt.tipped %}Yes{% else %}No{% endif %}
+      </td>
+      <td style="color: {% if appt.checked %}green{% else %}red{% endif %};">
+        {% if appt.checked %}Yes{% else %}No{% endif %}
+      </td>
+      <td>{{ appt.checker }}</td>
+      {#<td>{{ appt.feeder }}</td>#}
+      {#<td>{{ appt.putaway_driver }}</td>#}
+      <td>{{ appt.arrival_time|time:"H:i" }}</td>
+      <td>{{ appt.check_out_time|time:"H:i" }}</td>
+      <td>{{ appt.bay1 }}</td>
+      <td><a href="{% url 'edit_appointment' appt.id %}">Edit</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="16">No appointments found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} {% endcomment %} 
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .header-bar form {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .header-bar h2 {
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+    font-size: 24px;
+  }
+
+  .add-button {
+    margin-left: auto;
+  }
+
+  .summary {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .false {
+    color: red;
+    font-weight: bold;
+  }
+
+  .true {
+    color: green;
+    font-weight: bold;
+  }
+</style>
+
+<div class="header-bar">
+  <form method="get">
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" value="{{ request.GET.date }}">
+    <button type="submit">Filter</button>
+    <a href="{% url 'appointment_list' %}">Clear</a>
+  </form>
+
+  <h2>Appointments</h2>
+
+  <div class="add-button">
+    <a href="{% url 'add_appointment' %}">
+      <button>Add</button>
+    </a>
+  </div>
+</div>
+
+<div class="summary">
+  <div>Total: {{ total_appointments }}</div>
+  <div>Morning Shift: {{ morning_count }} ({{ morning_pallets }} pallets)</div>
+  <div>Back Shift: {{ back_count }} ({{ back_pallets }} pallets)</div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>P.O</th>
+      <th>Qty</th>
+      <th>Hall</th>
+      <th>Tipped</th>
+      <th>Checked</th>
+      <th>Checker</th>
+      <th>Feeder</th>
+      <th>Putaway</th>
+      <th>Arrival</th>
+      <th>Checkout</th>
+      <th>Bay1</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.id }}</td>
+      <td>{{ appt.description }}</td>
+      <td>{{ appt.scheduled_date|date:"M j, Y" }}</td>
+      <td>{{ appt.scheduled_time|time:"H:i" }}</td>
+      <td>{{ appt.po }}</td>
+      <td>{{ appt.pallet_qty }}</td>
+      <td>{{ appt.hall }}</td>
+      <td class="{{ appt.tipped|yesno:'true,false' }}">{{ appt.tipped|yesno:"Yes,No" }}</td>
+      <td class="{{ appt.checked|yesno:'true,false' }}">{{ appt.checked|yesno:"Yes,No" }}</td>
+      <td>{{ appt.checker }}</td>
+      <td>{{ appt.feeder }}</td>
+      <td>{{ appt.putaway_driver }}</td>
+      <td>{{ appt.arrival_time|default:"-" }}</td>
+      <td>{{ appt.check_out_time|default:"-" }}</td>
+      <td>{{ appt.bay1 }}</td>
+      <td><a href="{% url 'edit_appointment' appt.id %}">Edit</a></td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="16">No appointments found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} {% endcomment %}
+
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <!-- Filtro de data -->
+    <form method="get" style="display: flex; align-items: center;">
+        <label for="date" style="margin-right: 5px;">Filter by date:</label>
+        <input type="date" id="date" name="date" value="{{ selected_date }}" style="margin-right: 5px;">
+        <button type="submit">Filter</button>
+        <a href="{% url 'appointment_list' %}" style="margin-left: 10px;">Clear</a>
+    </form>
+
+    <!-- Título -->
+    <h2 style="margin: 0;">Appointments</h2>
+
+    <!-- Botão Add -->
+    <a href="{% url 'add_appointment' %}">
+        <button style="padding: 5px 10px;">Add</button>
+    </a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>P.O</th>
+            <th>Qty</th>
+            <th>Hall</th>
+            <th>Tipped</th>
+            <th>Checked</th>
+            <th>Checker</th>
+            <th>Feeder</th>
+            <th>Putaway</th>
+            <th>Arrival</th>
+            <th>Checkout</th>
+            <th>Bay</th>
+            {% comment %} <th>Bay2</th>
+            <th>Bay3</th> {% endcomment %}
+            {% comment %} <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for appt in appointments %}
+        <tr>
+            <td>{{ appt.id }}</td>
+            <td>{{ appt.description }}</td>
+            <td>{{ appt.scheduled_date|date:"F j, Y" }}</td>
+            <td>{{ appt.scheduled_time|time:"g:i a" }}</td>
+            <td>{{ appt.po }}</td>
+            <td>{{ appt.pallet_qty }}</td>
+            <td>{{ appt.hall }}</td>
+            <td style="color: {% if appt.tipped %}green{% else %}red{% endif %};">
+                {% if appt.tipped %}Yes{% else %}No{% endif %}
+            </td>
+            <td style="color: {% if appt.checked %}green{% else %}red{% endif %};">
+                {% if appt.checked %}Yes{% else %}No{% endif %}
+            </td>
+            <td>{{ appt.checker }}</td>
+            <td>{{ appt.feeder }}</td>
+            <td>{{ appt.putaway_driver }}</td>
+            <td>{{ appt.arrival_time }}</td>
+            <td>{{ appt.check_out_time }}</td>
+            <td>{{ appt.bay1 }}</td>
+            {% comment %} <td>{{ appt.bay2 }}</td>
+            <td>{{ appt.bay3 }}</td> {% endcomment %}
+            {% comment %} <td><a href="{% url 'edit_appointment' appt.id %}">Edit</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="18">No appointments found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %} {% endcomment %} 
+ 
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    padding: 20px;
+  }
+
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+  }
+
+  .filter-section {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .title {
+    text-align: center;
+    flex-grow: 1;
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .add-button button {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  td a {
+    text-decoration: none;
+    color: #007bff;
+  }
+
+  td .false {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+
+<div class="header-bar">
+  <div class="filter-section">
+    <form method="get">
+      <label for="date">Filter by date:</label>
+      <input type="date" id="date" name="date" value="{{ request.GET.date }}">
+      <button type="submit">Filter</button>
+      <a href="{% url 'appointments' %}">Clear</a>
+    </form>
+  </div>
+
+  <div class="title">Appointments</div>
+
+  <div class="add-button">
+    <a href="{% url 'add_appointment' %}">
+      <button>Add</button>
+    </a>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>P.O</th>
+      <th>Qty</th>
+      <th>Hall</th>
+      <th>Tipped</th>
+      <th>Checked</th>
+      <th>Checker</th>
+      <th>Feeder</th>
+      <th>Putaway</th>
+      <th>Arrival</th>
+      <th>Checkout</th>
+      <th>Bay1</th>
+      <th>Bay2</th>
+      <th>Bay3</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.id }}</td>
+      <td>{{ appt.description }}</td>
+      <td>{{ appt.scheduled_date|date:"M j, Y" }}</td>
+      <td>{{ appt.scheduled_time|time:"g:i a" }}</td>
+      <td>{{ appt.po }}</td>
+      <td>{{ appt.pallet_qty }}</td>
+      <td>{{ appt.hall }}</td>
+      <td class="{% if not appt.tipped %}false{% endif %}">
+        {{ appt.tipped|yesno:"Yes,No" }}
+      </td>
+      <td class="{% if not appt.checked %}false{% endif %}">
+        {{ appt.checked|yesno:"Yes,No" }}
+      </td>
+      <td>{{ appt.checker }}</td>
+      <td>{{ appt.feeder }}</td>
+      <td>{{ appt.putaway_driver }}</td>
+      <td>{{ appt.arrival_time|time:"g:i a" }}</td>
+      <td>{{ appt.check_out_time|time:"g:i a" }}</td>
+      <td>{{ appt.bay1 }}</td>
+      <td>{{ appt.bay2 }}</td>
+      <td>{{ appt.bay3 }}</td>
+      <td><a href="{% url 'edit_appointment' appt.id %}">Edit</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} {% endcomment %}

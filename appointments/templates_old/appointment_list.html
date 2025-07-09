@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Appointments</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <h1 style="text-align:center;">Appointments</h1>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin: 20px;">
+    <form method="get">
+      <label for="date">Filter by date:</label>
+      <input type="date" name="date" value="{{ data_filter }}">
+      <button type="submit">Filter</button>
+      {% if data_filter %}
+      <a href="{% url 'appointments' %}">Clear</a>
+      {% endif %}
+    </form>
+    <button onclick="openModalAndSetTime()" class="btn-add">Add</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Description</th><th>Date</th><th>Time</th><th>P.O</th><th>Qty</th><th>Hall</th>
+        <th>Tipped</th><th>Checked</th><th>Checker</th><th>Feeder</th><th>Putaway</th>
+        <th>Arrival</th><th>Checkout</th><th>Bay1</th><th>Bay2</th><th>Bay3</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ag in appointments %}
+      <tr>
+        <td>{{ ag.id }}</td>
+        <td>{{ ag.description }}</td>
+        <td>{{ ag.scheduled_date }}</td>
+        <td>{{ ag.scheduled_time }}</td>
+        <td>{{ ag.po }}</td>
+        <td>{{ ag.qtd_pallet }}</td>
+        <td>{{ ag.hall }}</td>
+        <td class="{{ ag.tipped|yesno:'true,false' }}">{{ ag.tipped|yesno:"Yes,No" }}</td>
+        <td class="{{ ag.checked|yesno:'true,false' }}">{{ ag.checked|yesno:"Yes,No" }}</td>
+        <td>{{ ag.checker }}</td>
+        <td>{{ ag.feeder }}</td>
+        <td>{{ ag.putaway_driver }}</td>
+        <td>{{ ag.arrival_time }}</td>
+        <td>{{ ag.check_out_time }}</td>
+        <td>{{ ag.bay1 }}</td>
+        <td>{{ ag.bay2 }}</td>
+        <td>{{ ag.bay3 }}</td>
+        <td><a href="{% url 'edit_appointment' ag.id %}">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="modal" id="formModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>New Appointment</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openModalAndSetTime() {
+      const now = new Date();
+      const horaAtual = now.toTimeString().slice(0, 5);
+      setTimeout(() => {
+        const arrival = document.querySelector('[name="arrival_time"]');
+        const checkout = document.querySelector('[name="check_out_time"]');
+        if (arrival && !arrival.value) arrival.value = horaAtual;
+        if (checkout && !checkout.value) checkout.value = horaAtual;
+      }, 100);
+      document.getElementById('formModal').style.display = 'block';
+    }
+    function closeModal() {
+      document.getElementById('formModal').style.display = 'none';
+    }
+    window.onclick = function(event) {
+      const modal = document.getElementById('formModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
