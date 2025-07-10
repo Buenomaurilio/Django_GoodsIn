@@ -59,6 +59,10 @@ from django.db.models import Sum
 from datetime import time
 from .forms import CheckerForm
 from .models import Checker
+import csv
+from django.http import HttpResponse
+import io
+from django.contrib import messages
 
 @login_required
 def appointment_list(request):
@@ -133,3 +137,59 @@ def add_checker(request):
     else:
         form = CheckerForm()
     return render(request, 'appointments/add_checker.html', {'form': form})
+
+
+@login_required
+def export_appointments_csv(request):
+    data_filter = request.GET.get('date')
+    appointments = Appointment.objects.all()
+    if data_filter:
+        appointments = appointments.filter(scheduled_date=data_filter)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="appointments.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Description', 'Date', 'Time', 'P.O', 'Qty', 'Hall', 'Tipped', 'Checked', 'Checker'])
+
+    for appt in appointments:
+        writer.writerow([
+            appt.id,
+            appt.description,
+            appt.scheduled_date,
+            appt.scheduled_time,
+            appt.po,
+            appt.qtd_pallet,
+            appt.hall,
+            appt.tipped,
+            appt.checked,
+            appt.checker.name if appt.checker else ''
+        ])
+
+    return response
+
+
+@login_required
+def import_appointments_csv(request):
+    if request.method == 'POST':
+        form = CSVImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+            decoded_file = csv_file.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+
+            for row in reader:
+                Appointment.objects.create(
+                    description=row['descricao'],
+                    scheduled_date=row['data'],
+                    scheduled_time=row['hora'],
+                    po=row['p.o'],
+                    qtd_pallet=row['qty'],
+                    hall=1  # ou um valor padrão
+                )
+            messages.success(request, "Appointments imported successfully.")
+            return redirect('appointment_list')
+    else:
+        form = CSVImportForm()
+    return render(request, 'appointments/import_csv.html', {'form': form})

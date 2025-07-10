@@ -84,6 +84,12 @@
       <input type="date" id="date" name="date" value="{{ request.GET.date }}">
       <button type="submit" class="btn">Filter</button>
       <a href="{% url 'appointment_list' %}" class="btn">Clear</a>
+      <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}">
+    <button style="padding: 6px 12px;">Export CSV</button>
+    </a>
+    <a href="{% url 'import_appointments_csv' %}">
+    <button style="padding: 6px 12px;">Import CSV</button>
+    </a>
     </form>
     <a href="{% url 'add_checker' %}" class="btn">Add Checker</a>
   </div>

@@ -2,6 +2,7 @@ from .models import Checker
 from django import forms
 from .models import Appointment
 
+
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
@@ -49,3 +50,7 @@ class CheckerForm(forms.ModelForm):
     class Meta:
         model = Checker
         fields = ['name']
+
+
+class CSVImportForm(forms.Form):
+    csv_file = forms.FileField()
