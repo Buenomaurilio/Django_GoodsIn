@@ -202,10 +202,10 @@
   <!-- Filtro por data -->
   <div class="section">
     <form method="get">
-      <label for="date">Filter:</label>
+      <label for="date">filter:</label>
       <input type="date" id="date" name="date" value="{{ request.GET.date }}">
-      <button type="submit" class="btn">Filter</button>
-      <a href="{% url 'appointment_list' %}" class="btn">Clear</a>
+      <button type="submit" class="btn">filter</button>
+      <a href="{% url 'appointment_list' %}" class="btn">clear</a>
     </form>
   </div>
 
@@ -215,24 +215,24 @@
     <form method="post" action="{% url 'import_appointments_csv' %}" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="file" name="file" accept=".csv" required>
-      <button type="submit" class="btn">Import</button>
+      <button type="submit" class="btn">import</button>
     </form>
   </div>
 
   <!-- Exportar CSV -->
   <div class="section">
-    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">Export CSV</a>
+    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">export .csv</a>
   </div>
-  <button class="btn" onclick="window.print()">Print</button>
+  <button class="btn" onclick="window.print()">print</button>
 
   <!-- Adicionar Checker -->
   <div class="section">
-    <a href="{% url 'add_checker' %}" class="btn">Add Checker</a>
+    <a href="{% url 'add_checker' %}" class="btn">add checker</a>
   </div>
 
   <!-- Add e Contadores -->
   <div class="section">
-    <a href="{% url 'add_appointment' %}" class="btn">Add Load</a>
+    <a href="{% url 'add_appointment' %}" class="btn">add load</a>
     <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
     <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
     <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
