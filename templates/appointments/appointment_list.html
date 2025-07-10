@@ -12,6 +12,184 @@
 
   .controls-bar {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+
+  .summary-box {
+    background: #f1f1f1;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  input[type="file"] {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 4px;
+    border-radius: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  td a {
+    text-decoration: none;
+    color: #007bff;
+  }
+
+  td .false {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+
+<!-- TÍTULO -->
+<div class="title-bar">Appointments</div>
+
+<!-- CONTROLES -->
+<div class="controls-bar">
+
+  <!-- Filtro por data -->
+  <div class="section">
+    <form method="get">
+      <label for="date">Filter:</label>
+      <input type="date" id="date" name="date" value="{{ request.GET.date }}">
+      <button type="submit" class="btn">Filter</button>
+      <a href="{% url 'appointment_list' %}" class="btn">Clear</a>
+    </form>
+  </div>
+
+  <!-- Exportar CSV -->
+  <div class="section">
+    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">Export CSV</a>
+  </div>
+
+  <!-- Importar CSV -->
+  <div class="section">
+    <form method="post" action="{% url 'import_appointments_csv' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="file" accept=".csv" required>
+      <button type="submit" class="btn">Import</button>
+    </form>
+  </div>
+
+  <!-- Adicionar Checker -->
+  <div class="section">
+    <a href="{% url 'add_checker' %}" class="btn">Add Checker</a>
+  </div>
+
+  <!-- Add e Contadores -->
+  <div class="section">
+    <a href="{% url 'add_appointment' %}" class="btn">Add Load</a>
+    <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
+    <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
+    <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
+  </div>
+
+</div>
+
+<!-- TABELA -->
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>P.O</th>
+      <th>Qty</th>
+      <th>Hall</th>
+      <th>Tipped</th>
+      <th>Checked</th>
+      <th>Checker</th>
+      <th>Arrival</th>
+      <th>Checkout</th>
+      <th>Bay</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.id }}</td>
+      <td>{{ appt.description }}</td>
+      <td>{{ appt.scheduled_date|date:"d/m/Y" }}</td>
+      <td>{{ appt.scheduled_time|time:"H:i" }}</td>
+      <td>{{ appt.po }}</td>
+      <td>{{ appt.qtd_pallet }}</td>
+      <td>{{ appt.hall }}</td>
+      <td style="color: {% if appt.tipped %}green{% else %}red{% endif %};">
+        {% if appt.tipped %}Yes{% else %}No{% endif %}
+      </td>
+      <td style="color: {% if appt.checked %}green{% else %}red{% endif %};">
+        {% if appt.checked %}Yes{% else %}No{% endif %}
+      </td>
+      <td>{{ appt.checker }}</td>
+      <td>{{ appt.arrival_time|time:"H:i" }}</td>
+      <td>{{ appt.check_out_time|time:"H:i" }}</td>
+      <td>{{ appt.bay1 }}</td>
+      <td><a href="{% url 'edit_appointment' appt.id %}">Edit</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="14">No appointments found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .title-bar {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .controls-bar {
+    display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 15px;
@@ -100,7 +278,6 @@
 
     <form method="post" action="{% url 'import_appointments_csv' %}" enctype="multipart/form-data" style="display: flex; align-items: center; gap: 6px;">
       {% csrf_token %}
-      {% comment %} <input type="file" name="csv_file" accept=".csv" required> {% endcomment %}
       <input type="file" name="file" accept=".csv" required>
       <button type="submit" class="btn">Import</button>
     </form>
@@ -164,7 +341,7 @@
     {% endfor %}
   </tbody>
 </table>
-{% endblock %}
+{% endblock %} {% endcomment %}
 
 
 
