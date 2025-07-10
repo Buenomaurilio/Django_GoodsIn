@@ -145,6 +145,21 @@
     color: red;
     font-weight: bold;
   }
+  @media print {
+  .controls-bar, .btn, input, select {
+    display: none !important;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
+
 </style>
 <script>
   function updateTable() {
@@ -186,7 +201,6 @@
 
 <!-- CONTROLES -->
 <div class="controls-bar">
-  <button class="toggle-theme-btn" onclick="toggleTheme()">Toggle Dark Mode</button>
 
   <!-- Filtro por data -->
   <div class="section">
@@ -198,11 +212,7 @@
     </form>
   </div>
 
-  <!-- Exportar CSV -->
-  <div class="section">
-    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">Export CSV</a>
-  </div>
-
+  
   <!-- Importar CSV -->
   <div class="section">
     <form method="post" action="{% url 'import_appointments_csv' %}" enctype="multipart/form-data">
@@ -211,6 +221,12 @@
       <button type="submit" class="btn">Import</button>
     </form>
   </div>
+
+  <!-- Exportar CSV -->
+  <div class="section">
+    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">Export CSV</a>
+  </div>
+  <button class="btn" onclick="window.print()">Print</button>
 
   <!-- Adicionar Checker -->
   <div class="section">
