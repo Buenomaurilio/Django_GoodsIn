@@ -3,6 +3,42 @@
 
 {% block content %}
 <style>
+    body.light-mode {
+    background-color: white;
+    color: black;
+  }
+
+  body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+
+  body.dark-mode table {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  body.dark-mode th {
+    background-color: #333;
+  }
+
+  body.dark-mode td {
+    border-color: #555;
+  }
+
+  .toggle-theme-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .toggle-theme-btn:hover {
+    background-color: #5a6268;
+  }
+
   .btn-edit {
     background-color: #007bff;
     color: white;
@@ -128,12 +164,29 @@
 
   setInterval(updateTable, 10000);  // Atualiza a cada 10 segundos
 </script>
+<script>
+  function toggleTheme() {
+    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.classList.remove(`${currentTheme}-mode`);
+    document.body.classList.add(`${newTheme}-mode`);
+    localStorage.setItem('theme', newTheme);
+  }
+
+  function applySavedTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.body.classList.add(`${saved}-mode`);
+  }
+
+  applySavedTheme();
+</script>
 
 <!-- TÍTULO -->
 <div class="title-bar">Appointments</div>
 
 <!-- CONTROLES -->
 <div class="controls-bar">
+  <button class="toggle-theme-btn" onclick="toggleTheme()">Toggle Dark Mode</button>
 
   <!-- Filtro por data -->
   <div class="section">
