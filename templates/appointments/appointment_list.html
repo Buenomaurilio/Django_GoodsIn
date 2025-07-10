@@ -100,7 +100,8 @@
 
     <form method="post" action="{% url 'import_appointments_csv' %}" enctype="multipart/form-data" style="display: flex; align-items: center; gap: 6px;">
       {% csrf_token %}
-      <input type="file" name="csv_file" accept=".csv" required>
+      {% comment %} <input type="file" name="csv_file" accept=".csv" required> {% endcomment %}
+      <input type="file" name="file" accept=".csv" required>
       <button type="submit" class="btn">Import</button>
     </form>
 

@@ -64,6 +64,9 @@ from django.http import HttpResponse
 import io
 from django.contrib import messages
 from django import forms
+
+
+
 @login_required
 def appointment_list(request):
     data_filter = request.GET.get('date')

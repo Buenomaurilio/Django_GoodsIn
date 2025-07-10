@@ -18,8 +18,8 @@ urlpatterns = [
     path('checkers/add/', views.add_checker, name='add_checker'),
     path('appointments/export/', views.export_appointments_csv, name='export_appointments_csv'),
     path('appointments/import/', views.import_appointments_csv, name='import_appointments_csv'),
+    
 ]
-
 
 # from django.contrib.auth import views as auth_views
 # from django.urls import path
