@@ -42,18 +42,16 @@
   .btn,
   .btn-edit,
   .btn-delete {
-    min-width: 100px;
-    height: 36px;
     padding: 6px 12px;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
     text-align: center;
     text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
     border: none;
+    height: 32px;
+    line-height: 20px;
   }
 
   .btn {
@@ -163,7 +161,6 @@
     }
   }
 </style>
-
 <script>
   function updateTable() {
     const dateParam = document.getElementById('date')?.value;
@@ -198,6 +195,7 @@
 
   applySavedTheme();
 </script>
+
 
 <!-- TÍTULO -->
 <div class="title-bar">Appointments</div>
