@@ -110,6 +110,24 @@
     font-weight: bold;
   }
 </style>
+<script>
+  function updateTable() {
+    const dateParam = document.getElementById('date')?.value;
+    const url = new URL("{% url 'appointment_table_partial' %}", window.location.origin);
+    if (dateParam) {
+      url.searchParams.set('date', dateParam);
+    }
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        document.querySelector("table tbody").innerHTML = data.table_html;
+      })
+      .catch(err => console.error("Failed to fetch updates:", err));
+  }
+
+  setInterval(updateTable, 10000);  // Atualiza a cada 10 segundos
+</script>
 
 <!-- TÍTULO -->
 <div class="title-bar">Appointments</div>

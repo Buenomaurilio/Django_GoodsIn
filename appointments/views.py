@@ -157,3 +157,20 @@ def delete_appointment(request, pk):
     appointment.delete()
     messages.success(request, "Appointment deleted successfully.")
     return redirect('appointment_list')
+
+from django.template.loader import render_to_string
+from django.http import JsonResponse
+
+@login_required
+def appointment_table_partial(request):
+    data_filter = request.GET.get('date')
+    if data_filter:
+        appointments = Appointment.objects.filter(scheduled_date=data_filter).order_by('scheduled_time')
+    else:
+        appointments = Appointment.objects.all().order_by('-scheduled_date', '-scheduled_time')
+
+    return JsonResponse({
+        'table_html': render_to_string('appointments/appointment_table_partial.html', {
+            'appointments': appointments
+        })
+    })
