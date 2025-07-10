@@ -149,3 +149,11 @@ def import_appointments_csv(request):
         form = CSVImportForm()
 
     return render(request, 'appointments/import_csv.html', {'form': form})
+
+
+@login_required
+def delete_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    appointment.delete()
+    messages.success(request, "Appointment deleted successfully.")
+    return redirect('appointment_list')
