@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
+<h2>Import Appointments CSV</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Import</button>
+  <a href="{% url 'appointment_list' %}">Cancel</a>
+</form>
+{% endblock %}
+
+
+{% comment %} {% extends 'base.html' %}
+{% block content %}
 <h2>Import Appointments</h2>
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
@@ -7,4 +19,6 @@
   <button type="submit">Import</button>
 </form>
 <a href="{% url 'appointment_list' %}">Back</a>
-{% endblock %}
+{% endblock %} {% endcomment %}
+
+

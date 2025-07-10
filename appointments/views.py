@@ -63,7 +63,7 @@ import csv
 from django.http import HttpResponse
 import io
 from django.contrib import messages
-
+from django import forms
 @login_required
 def appointment_list(request):
     data_filter = request.GET.get('date')
@@ -169,27 +169,33 @@ def export_appointments_csv(request):
     return response
 
 
-@login_required
+
+class CSVImportForm(forms.Form):
+    file = forms.FileField()
+
 def import_appointments_csv(request):
     if request.method == 'POST':
         form = CSVImportForm(request.POST, request.FILES)
         if form.is_valid():
-            csv_file = form.cleaned_data['csv_file']
-            decoded_file = csv_file.read().decode('utf-8')
-            io_string = io.StringIO(decoded_file)
-            reader = csv.DictReader(io_string)
+            file = form.cleaned_data['file']
+            decoded_file = file.read().decode('utf-8').splitlines()
+            reader = csv.DictReader(decoded_file)
 
             for row in reader:
-                Appointment.objects.create(
-                    description=row['descricao'],
-                    scheduled_date=row['data'],
-                    scheduled_time=row['hora'],
-                    po=row['p.o'],
-                    qtd_pallet=row['qty'],
-                    hall=1  # ou um valor padrão
-                )
+                try:
+                    Appointment.objects.create(
+                        description=row['Description'],
+                        scheduled_date=datetime.strptime(row['Date'], '%Y-%m-%d').date(),
+                        scheduled_time=datetime.strptime(row['Time'], '%H:%M:%S').time(),
+                        po=row['P.O'],
+                        qtd_pallet=int(row['Qty']),
+                    )
+                except Exception as e:
+                    messages.error(request, f"Erro ao importar linha: {row} - {e}")
+
             messages.success(request, "Appointments imported successfully.")
             return redirect('appointment_list')
     else:
         form = CSVImportForm()
+    
     return render(request, 'appointments/import_csv.html', {'form': form})
