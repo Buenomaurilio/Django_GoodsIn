@@ -1,70 +1,20 @@
-# from django.shortcuts import render, redirect, get_object_or_404
-# from .models import Appointment
-# from .forms import AppointmentForm
-# from django.contrib.auth.decorators import login_required
-
-# @login_required
-# def appointment_list(request):
-#     data_filter = request.GET.get('date')
-#     if data_filter:
-#         appointments = Appointment.objects.filter(scheduled_date=data_filter)
-#     else:
-#         appointments = Appointment.objects.all().order_by('-scheduled_date', '-scheduled_time')
-
-#     form = AppointmentForm()
-#     if request.method == 'POST':
-#         form = AppointmentForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('appointments')
-
-#     return render(request, 'appointments/appointment_list.html', {
-#         'form': form,
-#         'appointments': appointments,
-#         'data_filter': data_filter
-#     })
-
-# @login_required
-# def edit_appointment(request, pk):
-#     appointment = get_object_or_404(Appointment, pk=pk)
-#     if request.method == 'POST':
-#         form = AppointmentForm(request.POST, instance=appointment)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('appointment_list')
-#     else:
-#         form = AppointmentForm(instance=appointment)
-
-#     return render(request, 'appointments/edit_appointment.html', {
-#         'form': form,
-#         'appointment': appointment
-#     })
-
-
-# def add_appointment(request):
-#     if request.method == 'POST':
-#         form = AppointmentForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('appointment_list')
-#     else:
-#         form = AppointmentForm()
-#     return render(request, 'appointments/add_appointment.html', {'form': form})
-
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Appointment
-from .forms import AppointmentForm
+from .forms import AppointmentForm, CheckerForm
+from .models import Checker
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from datetime import time
-from .forms import CheckerForm
-from .models import Checker
+from datetime import time, datetime
 import csv
-from django.http import HttpResponse
 import io
+from django.http import HttpResponse
 from django.contrib import messages
 from django import forms
+from django.utils.dateparse import parse_date, parse_time
 
+
+class CSVImportForm(forms.Form):
+    file = forms.FileField()
 
 
 @login_required
@@ -76,11 +26,9 @@ def appointment_list(request):
     else:
         appointments = Appointment.objects.all().order_by('-scheduled_date', '-scheduled_time')
 
-    # Filtro por turno
     morning_shift = appointments.filter(scheduled_time__gte=time(5, 0), scheduled_time__lt=time(13, 30))
     back_shift = appointments.filter(scheduled_time__gte=time(13, 0), scheduled_time__lt=time(21, 30))
 
-    # Cálculos de resumo
     total_appointments = appointments.count()
     morning_count = morning_shift.count()
     back_count = back_shift.count()
@@ -128,10 +76,8 @@ def add_appointment(request):
     return render(request, 'appointments/add_appointment.html', {'form': form})
 
 
-
 @login_required
 def add_checker(request):
-    print("Entrou na view de adicionar checker") 
     if request.method == 'POST':
         form = CheckerForm(request.POST)
         if form.is_valid():
@@ -172,33 +118,34 @@ def export_appointments_csv(request):
     return response
 
 
-
-class CSVImportForm(forms.Form):
-    file = forms.FileField()
-
+@login_required
 def import_appointments_csv(request):
     if request.method == 'POST':
         form = CSVImportForm(request.POST, request.FILES)
         if form.is_valid():
-            file = form.cleaned_data['file']
-            decoded_file = file.read().decode('utf-8').splitlines()
-            reader = csv.DictReader(decoded_file)
+            file = request.FILES['file']
+            try:
+                decoded_file = io.TextIOWrapper(file, encoding='utf-8')
+                reader = csv.DictReader(decoded_file)
 
-            for row in reader:
-                try:
-                    Appointment.objects.create(
-                        description=row['Description'],
-                        scheduled_date=datetime.strptime(row['Date'], '%Y-%m-%d').date(),
-                        scheduled_time=datetime.strptime(row['Time'], '%H:%M:%S').time(),
-                        po=row['P.O'],
-                        qtd_pallet=int(row['Qty']),
-                    )
-                except Exception as e:
-                    messages.error(request, f"Erro ao importar linha: {row} - {e}")
+                for row in reader:
+                    try:
+                        Appointment.objects.create(
+                            description=row['Description'],
+                            scheduled_date=parse_date(row['Date']),
+                            scheduled_time=parse_time(row['Time']),
+                            po=row['P.O'],
+                            qtd_pallet=int(row['Qty']),
+                        )
+                    except Exception as e:
+                        messages.warning(request, f"Erro ao importar linha {row}: {e}")
 
-            messages.success(request, "Appointments imported successfully.")
-            return redirect('appointment_list')
+                messages.success(request, "Appointments imported successfully.")
+                return redirect('appointment_list')
+            except Exception as e:
+                messages.error(request, f"Erro ao processar arquivo: {e}")
+                return redirect('appointment_list')
     else:
         form = CSVImportForm()
-    
+
     return render(request, 'appointments/import_csv.html', {'form': form})
