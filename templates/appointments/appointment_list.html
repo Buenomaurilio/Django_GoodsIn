@@ -226,11 +226,6 @@
       <button type="submit" class="btn">filter</button>
       <a href="{% url 'appointment_list' %}" class="btn">clear</a>
     </form>
-  </div>
-
-  
-  <!-- Importar CSV -->
-  <div class="section">
     <form method="post" action="{% url 'import_appointments_csv' %}" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="file" name="file" accept=".csv" required>
@@ -238,6 +233,11 @@
       <button class="btn" onclick="window.print()">print</button>
     </form>
   </div>
+
+  
+  <!-- Importar CSV -->
+  {% comment %} <div class="section">
+  </div> {% endcomment %}
 
   <!-- Exportar CSV -->
   <div class="section">
