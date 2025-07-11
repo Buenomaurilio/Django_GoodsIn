@@ -238,6 +238,11 @@
   <!-- Importar CSV -->
   {% comment %} <div class="section">
   </div> {% endcomment %}
+  <div class="section">
+    <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
+    <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
+    <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
+  </div>
 
   
   {% comment %} <!-- Adicionar Checker -->
@@ -245,12 +250,7 @@
   </div> {% endcomment %}
 
   <!-- Add e Contadores -->
-  <div class="section">
-    <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
-    <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
-    <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
-  </div>
-  
+
   <!-- Exportar CSV -->
   <div class="section">
     <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">export .csv</a>
