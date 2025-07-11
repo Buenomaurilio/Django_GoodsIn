@@ -1,5 +1,9 @@
 {% block content %}
 <style>
+  .section.centered {
+    justify-content: center;
+  }
+
   .summary-section {
     display: flex;
     justify-content: center;
@@ -223,11 +227,11 @@
 <div class="title-bar">Appointments</div>
 
 <!-- RESUMO CENTRALIZADO -->
-<div class="summary-section">
+{% comment %} <div class="summary-section">
   <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
   <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
   <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
-</div>
+</div> {% endcomment %}
 
 <!-- CONTROLES -->
 <div class="controls-bar">
@@ -247,6 +251,12 @@
     </form>
   </div>
 
+  <!-- RESUMOS CENTRALIZADOS -->
+  <div class="section centered">
+    <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
+    <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
+    <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
+  </div>
 
   <!-- Exportar e adicionar -->
   <div class="section">
@@ -255,6 +265,7 @@
     <a href="{% url 'add_appointment' %}" class="btn-add-load">🚚 Add Load</a>
   </div>
 </div>
+
 
 <!-- TABELA -->
 <table>
