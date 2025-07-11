@@ -235,13 +235,13 @@
       {% csrf_token %}
       <input type="file" name="file" accept=".csv" required>
       <button type="submit" class="btn">import</button>
+      <button class="btn" onclick="window.print()">print</button>
     </form>
   </div>
 
   <!-- Exportar CSV -->
   <div class="section">
     <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">export .csv</a>
-    <button class="btn" onclick="window.print()">print</button>
     <a href="{% url 'add_checker' %}" class="btn">add checker</a>
     <a href="{% url 'add_appointment' %}" class="btn">add load</a>
   </div>
