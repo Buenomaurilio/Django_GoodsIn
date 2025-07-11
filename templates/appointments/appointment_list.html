@@ -239,13 +239,7 @@
   {% comment %} <div class="section">
   </div> {% endcomment %}
 
-  <!-- Exportar CSV -->
-  <div class="section">
-    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">export .csv</a>
-    <a href="{% url 'add_checker' %}" class="btn">add checker</a>
-    <a href="{% url 'add_appointment' %}" class="btn">add load</a>
-  </div>
-
+  
   {% comment %} <!-- Adicionar Checker -->
   <div class="section">
   </div> {% endcomment %}
@@ -256,7 +250,14 @@
     <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
     <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
   </div>
-
+  
+  <!-- Exportar CSV -->
+  <div class="section">
+    <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn">export .csv</a>
+    <a href="{% url 'add_checker' %}" class="btn">add checker</a>
+    <a href="{% url 'add_appointment' %}" class="btn">add load</a>
+  </div>
+  
 </div>
 
 <!-- TABELA -->
