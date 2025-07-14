@@ -1,6 +1,31 @@
 {% block content %}
 <style>
+  .controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .controls-bar .section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
   .summary-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 10px 0 20px;
+  }
+
+
+  {% comment %} .summary-section {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,7 +47,7 @@
     gap: 12px;
     justify-content: space-between;
     align-items: center;
-  }
+  } {% endcomment %}
 
   {% comment %} .section.centered {
     justify-content: center;
@@ -264,14 +289,14 @@
 <!-- TÍTULO -->
 <div class="title-bar">Appointments</div>
 
-<!-- LINHA DE RESUMOS CENTRALIZADA -->
+<!-- RESUMOS CENTRALIZADOS -->
 <div class="summary-section">
   <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
   <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
   <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
 </div>
 
-<!-- BARRA DE BOTÕES -->
+<!-- CONTROLES EM LINHA -->
 <div class="controls-bar">
   <div class="section">
     <form method="get">
