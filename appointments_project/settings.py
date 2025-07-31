@@ -12,7 +12,8 @@ DEBUG = 'RENDER' not in os.environ
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['django-goodsin-2.onrender.com', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['django-goodsin-2.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/appointments/'
