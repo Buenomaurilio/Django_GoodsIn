@@ -1,6 +1,72 @@
 {% block content %}
 <style>
-  /* (estilos existentes mantidos) */
+  .btn-dashboard {
+    background-color: #6f42c1;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .btn-dashboard:hover {
+    background-color: #5a32a3;
+  }
+
+  .controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .controls-bar .section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .summary-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 10px 0 20px;
+  }
+
+  body.light-mode {
+    background-color: white;
+    color: black;
+  }
+
+  body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+
+  body.dark-mode table {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  body.dark-mode th {
+    background-color: #333;
+  }
+
+  body.dark-mode td {
+    border-color: #555;
+  }
+
   .toggle-theme-btn {
     background-color: #6c757d;
     color: white;
@@ -12,6 +78,24 @@
 
   .toggle-theme-btn:hover {
     background-color: #5a6268;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
   }
 </style>
 
@@ -84,6 +168,7 @@
     <a href="{% url 'add_appointment' %}" class="btn-add-load">🚚 Add Load</a>
   </div>
 </div>
+
 <!-- TABELA -->
 <table>
   <thead>
