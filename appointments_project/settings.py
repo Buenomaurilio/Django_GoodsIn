@@ -8,8 +8,6 @@ SECRET_KEY = 'django-insecure-dev-key'
 
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['your-app-name.onrender.com']
-
 
 DEBUG = True
 
