@@ -165,7 +165,6 @@
     </div>
   </div>
 
-
   <!-- Loads por Status lado a lado -->
   <div class="chart-container">
     <div class="chart-box">
@@ -177,6 +176,7 @@
       <canvas id="statusMonthChart"></canvas>
     </div>
   </div>
+
   <!-- Pallets por Checker -->
   <h3>Pallets by Checker (Month)</h3>
   <canvas id="checkerChart"></canvas>
@@ -208,7 +208,7 @@
     }]
   };
   new Chart(document.getElementById('statusDayChart'), {
-    type: 'pie',
+    type: 'bar',
     data: statusDayData,
     options: { responsive: true, maintainAspectRatio: false }
   });
@@ -222,7 +222,7 @@
     }]
   };
   new Chart(document.getElementById('statusMonthChart'), {
-    type: 'pie',
+    type: 'bar',
     data: statusMonthData,
     options: { responsive: true, maintainAspectRatio: false }
   });
