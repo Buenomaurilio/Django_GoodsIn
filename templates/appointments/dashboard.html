@@ -38,6 +38,19 @@
     background-color: #5a32a3;
   }
 
+  .btn-theme-toggle {
+    background-color: #343a40;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .btn-theme-toggle:hover {
+    background-color: #23272b;
+  }
+
   input[type="date"] {
     padding: 6px 10px;
     border: 1px solid #ccc;
@@ -87,6 +100,20 @@
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     text-align: center;
+    height: auto;
+  }
+  .chart-box canvas {
+    width: 100% !important;
+    height: 300px !important;
+  }
+  body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  body.dark-mode .kpi-card,
+  body.dark-mode .chart-box {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
   }
 </style>
 
@@ -96,6 +123,7 @@
     <label for="date">Select a date:</label>
     <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
     <button type="submit" class="btn-dashboard">🔍 Filter</button>
+    <button type="button" class="btn-theme-toggle" onclick="toggleTheme()">🌓</button>
   </form>
 </div>
 
@@ -179,6 +207,20 @@
     data: statusMonthData,
     options: { responsive: true, maintainAspectRatio: false }
   });
+
+  function toggleTheme() {
+    const body = document.body;
+    const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+    body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', newTheme);
+  }
+
+  window.onload = function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  };
 </script>
 
 {% endblock %}
