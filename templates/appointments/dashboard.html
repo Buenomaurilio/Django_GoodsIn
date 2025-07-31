@@ -41,6 +41,13 @@
 <div class="dashboard-container">
   <h2>Dashboard</h2>
 
+  <form method="get" style="margin-bottom: 20px; text-align: center;">
+    <label for="date">Select a date:</label>
+    <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+    <button type="submit" class="btn-dashboard">🔍 Filter</button>
+  </form>
+
+
   <!-- KPIs -->
   <div class="kpi-boxes">
     <div class="kpi-card">
