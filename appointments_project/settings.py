@@ -8,13 +8,12 @@ SECRET_KEY = 'django-insecure-dev-key'
 
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['your-app-name.onrender.com']
-
 
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['django-goodsin-2.onrender.com', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['django-goodsin-2.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/appointments/'
