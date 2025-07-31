@@ -1,18 +1,3 @@
-{% comment %} <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Edit Appointment</title>
-</head>
-<body>
-  <h2>Edit Appointment #{{ appointment.id }}</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Changes</button>
-  </form>
-</body>
-</html> {% endcomment %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,7 +58,72 @@
   <h2>Edit Appointment #{{ appointment.id }}</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {% comment %} {{ form.as_p }} {% endcomment %}
+    <p>
+      <label for="{{ form.description.id_for_label }}">Description:</label>
+      {{ form.description }}
+    </p>
+
+    <p>
+      <label for="{{ form.scheduled_date.id_for_label }}">Scheduled Date:</label>
+      {{ form.scheduled_date }}
+    </p>
+
+    <p>
+      <label for="{{ form.scheduled_time.id_for_label }}">Scheduled Time:</label>
+      {{ form.scheduled_time }}
+    </p>
+
+    <p>
+      <label for="{{ form.po.id_for_label }}">P.O:</label>
+      {{ form.po }}
+    </p>
+
+    <p>
+      <label for="{{ form.qtd_pallet.id_for_label }}">Pallet Quantity:</label>
+      {{ form.qtd_pallet }}
+    </p>
+
+    <p>
+      <label for="{{ form.hall.id_for_label }}">Hall:</label>
+      {{ form.hall }}
+    </p>
+
+    <p>
+      <label for="{{ form.tipped.id_for_label }}">Tipped:</label>
+      {{ form.tipped }}
+    </p>
+
+    <p>
+      <label for="{{ form.checked.id_for_label }}">Checked:</label>
+      {{ form.checked }}
+    </p>
+
+    <p>
+      <label for="{{ form.checker.id_for_label }}">Checker:</label>
+      {{ form.checker }}
+    </p>
+
+    <p>
+      <label for="{{ form.arrival_time.id_for_label }}">Arrival Time:</label>
+      {{ form.arrival_time }}
+    </p>
+
+    <p>
+      <label for="{{ form.check_out_time.id_for_label }}">Check-out Time:</label>
+      {{ form.check_out_time }}
+    </p>
+
+    <p>
+      <label for="{{ form.bay1.id_for_label }}">Bay:</label>
+      {{ form.bay1 }}
+    </p>
+
+    <p>
+      <label for="{{ form.status_load.id_for_label }}">Status:</label>
+      {{ form.status_load }}
+    </p>
+
     <div class="form-buttons">
       <a href="{% url 'appointment_list' %}" class="btn-back">Back</a>
       <button type="submit" class="btn-submit">Save Changes</button>
