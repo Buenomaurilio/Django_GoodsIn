@@ -208,8 +208,8 @@
   <div class="section">
     <a href="{% url 'dashboard' %}" class="btn-dashboard">📊 Dashboard</a>
     <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn-export">📤 Export CSV</a>
-    <a href="{% url 'add_checker' %}" class="btn-add-checker">➕ Add Checker</a>
-    <a href="{% url 'add_appointment' %}" class="btn-add-load">🚚 Add Load</a>
+    <a href="{% url 'add_checker' %}?date={{ request.GET.date }}" class="btn-add-checker">➕ Add Checker</a>
+    <a href="{% url 'add_appointment' %}?date={{ request.GET.date }}" class="btn-add-load">🚚 Add Load</a>
   </div>
 </div>
 
