@@ -1,154 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Appointments</title>
+  <script>
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.classList.add(`${savedTheme}-mode`);
+  </script>
+  <style>
+    .btn-dashboard {
+      background-color: #6f42c1;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-dashboard:hover {
+      background-color: #5a32a3;
+    }
+
+    .btn-filter, .btn-clear, .btn-import, .btn-print, .btn-export, .btn-add-checker, .btn-add-load, .toggle-theme-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-filter:hover, .btn-clear:hover, .btn-import:hover, .btn-print:hover, .btn-export:hover, .btn-add-checker:hover, .btn-add-load:hover, .toggle-theme-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-edit {
+      background-color: #007bff;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+      margin-right: 6px;
+    }
+
+    .btn-edit:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-delete:hover {
+      background-color: #c82333;
+    }
+
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .controls-bar .section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .summary-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 10px 0 20px;
+    }
+
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    .dark-mode table {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    .dark-mode th {
+      background-color: #007bff;
+    }
+
+    .dark-mode td {
+      border-color: #555;
+    }
+
+    .toggle-theme-btn {
+      position: absolute;
+      top: -50px;
+      right: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .title-bar {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
 {% block content %}
-<style>
-  .btn-dashboard {
-    background-color: #6f42c1;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .btn-dashboard:hover {
-    background-color: #5a32a3;
-  }
-
-  .btn-filter, .btn-clear, .btn-import, .btn-print, .btn-export, .btn-add-checker, .btn-add-load {
-    background-color: #007bff;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .btn-filter:hover, .btn-clear:hover, .btn-import:hover, .btn-print:hover, .btn-export:hover, .btn-add-checker:hover, .btn-add-load:hover {
-    background-color: #0056b3;
-  }
-
-  .btn-edit {
-    background-color: #007bff;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    text-decoration: none;
-    margin-right: 6px;
-  }
-
-  .btn-edit:hover {
-    background-color: #0056b3;
-  }
-
-  .btn-delete {
-    background-color: #dc3545;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    text-decoration: none;
-  }
-
-  .btn-delete:hover {
-    background-color: #c82333;
-  }
-
-  .controls-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-
-  .controls-bar .section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-  }
-  .summary-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin: 10px 0 20px;
-  }
-
-  body.light-mode {
-    background-color: white;
-    color: black;
-  }
-
-  body.dark-mode {
-    background-color: #121212;
-    color: #e0e0e0;
-  }
-
-  body.dark-mode table {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
-  }
-
-  body.dark-mode th {
-    background-color: #333;
-  }
-
-  body.dark-mode td {
-    border-color: #555;
-  }
-
-  .toggle-theme-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .toggle-theme-btn:hover {
-    background-color: #5a6268;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    font-size: 0.875rem;
-  }
-
-  th, td {
-    border: 1px solid #ddd;
-    padding: 6px;
-    text-align: center;
-  }
-
-  th {
-    background-color: #007bff;
-    color: white;
-  }
-</style>
-
 <script>
   function updateTable() {
     const dateParam = document.getElementById('date')?.value;
@@ -156,7 +163,6 @@
     if (dateParam) {
       url.searchParams.set('date', dateParam);
     }
-
     fetch(url)
       .then(response => response.json())
       .then(data => {
@@ -164,37 +170,27 @@
       })
       .catch(err => console.error("Failed to fetch updates:", err));
   }
-
   setInterval(updateTable, 10000);
 
   function toggleTheme() {
-    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    const currentTheme = document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light';
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.body.classList.remove(`${currentTheme}-mode`);
-    document.body.classList.add(`${newTheme}-mode`);
+    document.documentElement.classList.remove(`${currentTheme}-mode`);
+    document.documentElement.classList.add(`${newTheme}-mode`);
     localStorage.setItem('theme', newTheme);
   }
-
-  function applySavedTheme() {
-    const saved = localStorage.getItem('theme') || 'light';
-    document.body.classList.add(`${saved}-mode`);
-  }
-
-  applySavedTheme();
 </script>
 
-<!-- TÍTULO -->
 <div class="title-bar">Appointments</div>
 
-<!-- RESUMOS CENTRALIZADOS -->
 <div class="summary-section">
   <div class="summary-box"><strong>Trucks:</strong> {{ appointments|length }}</div>
   <div class="summary-box">Morning: {{ morning_count }} / {{ morning_pallets }} pallets</div>
   <div class="summary-box">Back: {{ back_count }} / {{ back_pallets }} pallets</div>
 </div>
 
-<!-- CONTROLES EM LINHA -->
 <div class="controls-bar">
+  <button onclick="toggleTheme()" class="toggle-theme-btn">🌓</button>
   <div class="section">
     <form method="get">
       <label for="date">filter:</label>
@@ -208,9 +204,7 @@
       <button type="submit" class="btn-import">📥 Import</button>
       <button type="button" class="btn-print" onclick="window.print()">🖨️ Print</button>
     </form>
-    <button onclick="toggleTheme()" class="toggle-theme-btn">🌓</button>
   </div>
-
   <div class="section">
     <a href="{% url 'dashboard' %}" class="btn-dashboard">📊 Dashboard</a>
     <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn-export">📤 Export CSV</a>
@@ -219,7 +213,6 @@
   </div>
 </div>
 
-<!-- TABELA -->
 <table>
   <thead>
     <tr>
@@ -272,3 +265,5 @@
   </tbody>
 </table>
 {% endblock %}
+</body>
+</html>
