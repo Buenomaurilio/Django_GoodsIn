@@ -23,7 +23,7 @@ class Appointment(models.Model):
 
     STATUS_CHOICES = [
         ('on time', 'On Time'),
-        ('cancelled', 'Cancelled'),
+        ('canceled', 'Canceled'),
         ('rescheduled', 'Rescheduled'),
     ]
     status_load = models.CharField(
