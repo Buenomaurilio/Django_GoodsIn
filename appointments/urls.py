@@ -9,6 +9,7 @@
 
 
 from django.urls import path
+from .views import dashboard_view
 from . import views
 
 urlpatterns = [
@@ -20,7 +21,7 @@ urlpatterns = [
     path('appointments/import/', views.import_appointments_csv, name='import_appointments_csv'),
     path('delete/<int:pk>/', views.delete_appointment, name='delete_appointment'),
     path('appointments/table/', views.appointment_table_partial, name='appointment_table_partial'),
-
+    path('dashboard/', dashboard_view, name='dashboard'),
 ]
 
 # from django.contrib.auth import views as auth_views

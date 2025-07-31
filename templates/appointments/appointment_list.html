@@ -1,5 +1,25 @@
 {% block content %}
 <style>
+  .btn-dashboard {
+    background-color: #6f42c1;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .btn-dashboard:hover {
+    background-color: #5a32a3;
+  }
+
   .controls-bar {
     display: flex;
     flex-wrap: wrap;
@@ -314,6 +334,7 @@
   </div>
 
   <div class="section">
+    <a href="{% url 'dashboard' %}" class="btn-dashboard">📊 Dashboard</a>
     <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn-export">📤 Export CSV</a>
     <a href="{% url 'add_checker' %}" class="btn-add-checker">➕ Add Checker</a>
     <a href="{% url 'add_appointment' %}" class="btn-add-load">🚚 Add Load</a>

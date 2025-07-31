@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 20px;
+  }
+  .kpi-boxes {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .kpi-card {
+    background: #f1f1f1;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1;
+    text-align: center;
+    min-width: 180px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .kpi-card h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+  canvas {
+    max-width: 100%;
+  }
+</style>
+
+<div class="dashboard-container">
+  <h2>Dashboard</h2>
+
+  <!-- KPIs -->
+  <div class="kpi-boxes">
+    <div class="kpi-card">
+      <h3>Pallets Today</h3>
+      <p>{{ pallets_today }}</p>
+    </div>
+    <div class="kpi-card">
+      <h3>Pallets This Month</h3>
+      <p>{{ pallets_month }}</p>
+    </div>
+    <div class="kpi-card">
+      <h3>Total Pallets</h3>
+      <p>{{ pallets_total }}</p>
+    </div>
+  </div>
+
+  <!-- Pallets por Checker -->
+  <h3>Pallets por Checker (Mês)</h3>
+  <canvas id="checkerChart"></canvas>
+
+  <!-- Loads por Status Hoje -->
+  <h3>Status dos Loads (Hoje)</h3>
+  <canvas id="statusDayChart"></canvas>
+
+  <!-- Loads por Status Mês -->
+  <h3>Status dos Loads (Mês)</h3>
+  <canvas id="statusMonthChart"></canvas>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const checkerData = {
+    labels: [{% for c in checker_month %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+    datasets: [{
+      label: 'Pallets por Checker',
+      data: [{% for c in checker_month %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      backgroundColor: 'rgba(54, 162, 235, 0.7)'
+    }]
+  };
+  new Chart(document.getElementById('checkerChart'), {
+    type: 'bar',
+    data: checkerData,
+    options: { responsive: true }
+  });
+
+  const statusDayData = {
+    labels: [{% for s in loads_status_day %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+    datasets: [{
+      label: 'Status Hoje',
+      data: [{% for s in loads_status_day %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+    }]
+  };
+  new Chart(document.getElementById('statusDayChart'), {
+    type: 'pie',
+    data: statusDayData,
+    options: { responsive: true }
+  });
+
+  const statusMonthData = {
+    labels: [{% for s in loads_status_month %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+    datasets: [{
+      label: 'Status Mês',
+      data: [{% for s in loads_status_month %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+    }]
+  };
+  new Chart(document.getElementById('statusMonthChart'), {
+    type: 'pie',
+    data: statusMonthData,
+    options: { responsive: true }
+  });
+</script>
+
+{% endblock %}

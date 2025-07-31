@@ -11,6 +11,11 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django import forms
 from django.utils.dateparse import parse_date, parse_time
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncDay, TruncMonth, TruncWeek
+from django.utils.timezone import now
+from django.shortcuts import render
+from .models import Appointment
 
 
 class CSVImportForm(forms.Form):
@@ -174,3 +179,45 @@ def appointment_table_partial(request):
             'appointments': appointments
         })
     })
+
+def dashboard_view(request):
+    today = now().date()
+    month = today.month
+    year = today.year
+
+    # Pallets totais
+    pallets_today = Appointment.objects.filter(scheduled_date=today).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    pallets_month = Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
+
+    # Pallets por checker (mensal)
+    checker_month = (
+        Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
+        .values('checker__name')
+        .annotate(total=Sum('qtd_pallet'))
+        .order_by('-total')
+    )
+
+    # Loads por status
+    loads_status_day = (
+        Appointment.objects.filter(scheduled_date=today)
+        .values('status_load')
+        .annotate(count=Count('id'))
+    )
+
+    loads_status_month = (
+        Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
+        .values('status_load')
+        .annotate(count=Count('id'))
+    )
+
+    context = {
+        'pallets_today': pallets_today,
+        'pallets_month': pallets_month,
+        'pallets_total': pallets_total,
+        'checker_month': checker_month,
+        'loads_status_day': loads_status_day,
+        'loads_status_month': loads_status_month,
+    }
+
+    return render(request, 'appointments/dashboard.html', context)
