@@ -1,5 +1,6 @@
 from django.utils.dateparse import parse_date, parse_time
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .models import Appointment, Checker
 from .forms import AppointmentForm, CheckerForm
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django import forms
+from datetime import time
 import csv
 import io
 
