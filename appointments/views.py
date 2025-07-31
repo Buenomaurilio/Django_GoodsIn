@@ -1,3 +1,4 @@
+from django.utils.dateparse import parse_date
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Appointment
 from .forms import AppointmentForm, CheckerForm
@@ -180,17 +181,18 @@ def appointment_table_partial(request):
         })
     })
 
-def dashboard_view(request):
-    today = now().date()
-    month = today.month
-    year = today.year
 
-    # Pallets totais
-    pallets_today = Appointment.objects.filter(scheduled_date=today).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+def dashboard_view(request):
+    date_str = request.GET.get('date')
+    selected_date = parse_date(date_str) if date_str else now().date()
+
+    month = selected_date.month
+    year = selected_date.year
+
+    pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_month = Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
 
-    # Pallets por checker (mensal)
     checker_month = (
         Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
         .values('checker__name')
@@ -198,9 +200,8 @@ def dashboard_view(request):
         .order_by('-total')
     )
 
-    # Loads por status
     loads_status_day = (
-        Appointment.objects.filter(scheduled_date=today)
+        Appointment.objects.filter(scheduled_date=selected_date)
         .values('status_load')
         .annotate(count=Count('id'))
     )
@@ -212,6 +213,7 @@ def dashboard_view(request):
     )
 
     context = {
+        'selected_date': selected_date,
         'pallets_today': pallets_today,
         'pallets_month': pallets_month,
         'pallets_total': pallets_total,
