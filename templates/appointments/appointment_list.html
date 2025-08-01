@@ -7,7 +7,13 @@
     <h2 class="mb-0">Appointments</h2>
     <div class="d-flex gap-2 flex-wrap">
       <form method="get" class="d-flex align-items-center">
-        <input type="date" id="date" name="date" class="form-control form-control-sm me-2" value="{{ data_filter|date:'Y-m-d' }}">
+        <input type="date" id="date" name="date" class="form-control form-control-sm me-2"
+               value="{{ request.GET.date|default:data_filter|date:'Y-m-d' }}">
+      
+        <input type="text" name="po" placeholder="Search P.O"
+               class="form-control form-control-sm me-2"
+               value="{{ request.GET.po }}">
+      
         <button type="submit" class="btn btn-primary btn-sm me-2">🔍 Filter</button>
         <a href="{% url 'appointment_list' %}" class="btn btn-secondary btn-sm">🧹 Clear</a>
       </form>
