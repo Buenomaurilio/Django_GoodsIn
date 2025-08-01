@@ -38,7 +38,7 @@
 
 <div class="card mb-4">
   <div class="card-header fw-semibold">Pallets by Checker (Month)</div>
-  <div class="card-body bg-white dark-mode">
+  <div class="card-body">
     <canvas id="checkerChart"></canvas>
   </div>
 </div>
@@ -47,7 +47,7 @@
   <div class="col-md-6 mb-4">
     <div class="card">
       <div class="card-header fw-semibold">Status Loads (Today)</div>
-      <div class="card-body bg-white dark-mode">
+      <div class="card-body">
         <canvas id="statusDayChart"></canvas>
       </div>
     </div>
@@ -55,7 +55,7 @@
   <div class="col-md-6 mb-4">
     <div class="card">
       <div class="card-header fw-semibold">Status Loads (Month)</div>
-      <div class="card-body bg-white dark-mode">
+      <div class="card-body">
         <canvas id="statusMonthChart"></canvas>
       </div>
     </div>
@@ -64,6 +64,33 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  function getChartOptions() {
+    const isDark = document.body.classList.contains('dark-mode');
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: isDark ? '#e0e0e0' : '#000'
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: isDark ? '#e0e0e0' : '#000'
+          }
+        },
+        y: {
+          ticks: {
+            color: isDark ? '#e0e0e0' : '#000'
+          }
+        }
+      }
+    };
+  }
+
   const checkerData = {
     labels: [{% for c in checker_month %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
     datasets: [{
@@ -75,7 +102,7 @@
   new Chart(document.getElementById('checkerChart'), {
     type: 'bar',
     data: checkerData,
-    options: { responsive: true, maintainAspectRatio: false }
+    options: getChartOptions()
   });
 
   const statusDayData = {
@@ -89,7 +116,7 @@
   new Chart(document.getElementById('statusDayChart'), {
     type: 'bar',
     data: statusDayData,
-    options: { responsive: true, maintainAspectRatio: false }
+    options: getChartOptions()
   });
 
   const statusMonthData = {
@@ -103,7 +130,7 @@
   new Chart(document.getElementById('statusMonthChart'), {
     type: 'bar',
     data: statusMonthData,
-    options: { responsive: true, maintainAspectRatio: false }
+    options: getChartOptions()
   });
 </script>
 {% endblock %}
