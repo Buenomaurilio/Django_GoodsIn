@@ -44,7 +44,7 @@
       <a class="navbar-brand" href="#">My App</a>
       <div class="d-flex gap-2">
         <form method="get" action="" class="d-flex align-items-center">
-          <input type="date" name="date" id="date-filter" class="form-control form-control-sm me-2" value="{{ request.GET.date|default:today|date:'Y-m-d' }}">
+          <input type="date" name="date" id="date-filter" class="form-control form-control-sm me-2" value="{{ data_filter|date:'Y-m-d' }}">
           <button class="btn btn-primary btn-sm">🔍</button>
         </form>
         <button onclick="toggleTheme()" class="toggle-theme-btn btn-sm" id="toggleTheme">🌓</button>
