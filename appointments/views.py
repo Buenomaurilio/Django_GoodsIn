@@ -19,10 +19,18 @@ class CSVImportForm(forms.Form):
 def appointment_list(request):
     today = now().date()
     data_filter = request.GET.get('date', today)
+    po_filter = request.GET.get('po', '').strip()
+
     if isinstance(data_filter, str):
         data_filter = parse_date(data_filter)
 
-    appointments = Appointment.objects.filter(scheduled_date=data_filter).order_by('scheduled_time')
+    appointments = Appointment.objects.filter(scheduled_date=data_filter)
+
+    if po_filter:
+        appointments = appointments.filter(po__icontains=po_filter)
+
+    appointments = appointments.order_by('scheduled_time')
+
     morning_shift = appointments.filter(scheduled_time__gte=parse_time("05:00"), scheduled_time__lt=parse_time("13:30"))
     back_shift = appointments.filter(scheduled_time__gte=parse_time("13:00"), scheduled_time__lt=parse_time("21:30"))
 
@@ -36,6 +44,7 @@ def appointment_list(request):
         'back_pallets': back_shift.aggregate(Sum('qtd_pallet'))['qtd_pallet__sum'] or 0,
     }
     return render(request, 'appointments/appointment_list.html', context)
+
 
 @login_required
 def edit_appointment(request, pk):
