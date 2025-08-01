@@ -5,7 +5,7 @@
   <div class="d-flex gap-2">
     <form method="get" class="d-flex align-items-center">
       <input type="date" id="date" name="date" class="form-control form-control-sm me-2" value="{{ data_filter|date:'Y-m-d' }}">
-      <button type="submit" class="btn btn-primary btn-sm">🔍 Filter</button>
+      <button type="submit" class="btn btn-primary btn-sm me-2">🔍 Filter</button>
       <a href="{% url 'appointment_list' %}" class="btn btn-secondary btn-sm">🧹 Clear</a>
     </form>
     <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm">📤 Export</a>
