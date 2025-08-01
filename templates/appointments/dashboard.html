@@ -65,27 +65,34 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const darkColor = document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#000';
-
-  const baseOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: darkColor
+  function getChartOptions() {
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#e0e0e0' : '#000';
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      backgroundColor: 'transparent',
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: textColor
+          }
+        },
+        y: {
+          ticks: {
+            color: textColor
+          }
         }
       }
-    },
-    scales: {
-      x: {
-        ticks: { color: darkColor }
-      },
-      y: {
-        ticks: { color: darkColor }
-      }
-    }
-  };
+    };
+  }
 
   new Chart(document.getElementById('checkerChart'), {
     type: 'bar',
@@ -97,7 +104,7 @@
         backgroundColor: 'rgba(54, 162, 235, 0.7)'
       }]
     },
-    options: baseOptions
+    options: getChartOptions()
   });
 
   new Chart(document.getElementById('statusDayChart'), {
@@ -110,7 +117,7 @@
         backgroundColor: ['#28a745', '#ffc107', '#dc3545']
       }]
     },
-    options: baseOptions
+    options: getChartOptions()
   });
 
   new Chart(document.getElementById('statusMonthChart'), {
@@ -123,7 +130,7 @@
         backgroundColor: ['#28a745', '#ffc107', '#dc3545']
       }]
     },
-    options: baseOptions
+    options: getChartOptions()
   });
 </script>
 {% endblock %}
