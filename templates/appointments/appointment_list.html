@@ -3,25 +3,33 @@
 
 <!-- Header e Filtros fixos -->
 <div class="sticky-top py-3" style="top: 0; z-index: 1020; background-color: var(--bs-body-bg);">
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-2 gap-2">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
     <h2 class="mb-0">Appointments</h2>
-    <div class="d-flex align-items-center flex-wrap gap-2">
-      <form method="get" class="d-flex align-items-center gap-2 mb-0 flex-wrap">
+
+    <!-- Formulário com campos à esquerda e botões à direita -->
+    <form method="get" class="w-100 d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <!-- Inputs: date + PO -->
+      <div class="d-flex flex-grow-1 gap-2">
         <input type="date" id="date" name="date"
                class="form-control form-control-sm bg-body text-body"
                value="{{ data_filter|date:'Y-m-d' }}">
         <input type="text" id="po" name="po" placeholder="Search P.O"
                class="form-control form-control-sm bg-body text-body"
                value="{{ request.GET.po }}">
+      </div>
+
+      <!-- Botões: Filter, Clear, Export, Add -->
+      <div class="d-flex gap-2 flex-wrap justify-content-end">
         <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
         <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
-      </form>
-      <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm px-2">📤 Export</a>
-      <a href="{% url 'add_appointment' %}" class="btn btn-info btn-sm px-2">🚚 Add Load</a>
-      <a href="{% url 'add_checker' %}" class="btn btn-warning btn-sm px-2">➕ Add Checker</a>
-    </div>
+        <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm px-2">📤 Export</a>
+        <a href="{% url 'add_appointment' %}" class="btn btn-info btn-sm px-2">🚚 Add Load</a>
+        <a href="{% url 'add_checker' %}" class="btn btn-warning btn-sm px-2">➕ Add Checker</a>
+      </div>
+    </form>
   </div>
 
+  <!-- KPIs -->
   <div class="row mb-2">
     <div class="col">
       <div class="alert alert-primary text-center py-2 mb-1">
