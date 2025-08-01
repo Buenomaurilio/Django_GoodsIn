@@ -25,6 +25,7 @@ class Appointment(models.Model):
         ('on time', 'On Time'),
         ('canceled', 'Canceled'),
         ('rescheduled', 'Rescheduled'),
+        ('no show up', 'No Show up'),
     ]
     status_load = models.CharField(
         max_length=20,
