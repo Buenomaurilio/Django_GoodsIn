@@ -6,15 +6,24 @@
   <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
     <h2 class="mb-0">Appointments</h2>
     <div class="d-flex gap-2 flex-wrap align-items-center">
-      <form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-0">
-        <input type="date" id="date" name="date"
-               class="form-control form-control-sm bg-body text-body"
-               value="{{ data_filter|date:'Y-m-d' }}">
-        <input type="text" id="po" name="po" placeholder="Search P.O"
-               class="form-control form-control-sm bg-body text-body"
-               value="{{ request.GET.po }}">
-        <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
-        <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
+      <form method="get" class="row g-2 align-items-center mb-0">
+        <div class="col-auto">
+          <input type="date" id="date" name="date"
+                 class="form-control form-control-sm bg-body text-body"
+                 value="{{ data_filter|date:'Y-m-d' }}">
+        </div>
+        <div class="col-auto">
+          <input type="text" id="po" name="po"
+                 placeholder="Search P.O"
+                 class="form-control form-control-sm bg-body text-body"
+                 value="{{ request.GET.po }}">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
+        </div>
       </form>
       <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm px-2">📤 Export</a>
       <a href="{% url 'add_appointment' %}" class="btn btn-info btn-sm px-2">🚚 Add Load</a>
