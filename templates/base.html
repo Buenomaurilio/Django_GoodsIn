@@ -1,48 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Appointments</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Appointments{% endblock %}</title>
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        th, td {
-            padding: 8px;
-            text-align: center;
-        }
-
-        a {
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        button {
-            padding: 6px 10px;
-            cursor: pointer;
-        }
-    </style>
+  <!-- CSS from Star Admin Free -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-line-icons/css/simple-line-icons.css">
+  <style>
+    body.dark-mode {
+      background-color: #1c1c1e;
+      color: #e0e0e0;
+    }
+    .dark-mode .card, .dark-mode table {
+      background-color: #2c2c2e;
+      color: #fff;
+    }
+    .dark-mode .table th {
+      background-color: #444;
+    }
+    .dark-mode .btn {
+      color: #fff;
+    }
+    .toggle-theme-btn {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .toggle-theme-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
 </head>
-<body>
-    {% block content %}{% endblock %}
+<body onload="applySavedTheme()">
+  <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="#">My App</a>
+      <div class="d-flex gap-2">
+        <form method="get" action="" class="d-flex align-items-center">
+          <input type="date" name="date" id="date-filter" class="form-control form-control-sm me-2" value="{{ request.GET.date|default:today|date:'Y-m-d' }}">
+          <button class="btn btn-primary btn-sm">🔍</button>
+        </form>
+        <button onclick="toggleTheme()" class="toggle-theme-btn btn-sm" id="toggleTheme">🌓</button>
+      </div>
+    </nav>
+
+    <div class="row">
+      <div class="col-2 bg-light p-3">
+        <!-- Sidebar -->
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'appointment_list' %}">Appointments</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-10 p-4">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleTheme() {
+      const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.body.classList.remove(`${currentTheme}-mode`);
+      document.body.classList.add(`${newTheme}-mode`);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    function applySavedTheme() {
+      const saved = localStorage.getItem('theme') || 'light';
+      document.body.classList.add(`${saved}-mode`);
+    }
+  </script>
 </body>
 </html>
