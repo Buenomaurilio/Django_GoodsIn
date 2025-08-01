@@ -2,28 +2,19 @@
 {% block content %}
 
 <!-- Header e Filtros fixos -->
-<div class="sticky-top py-3" style="top: 0; z-index: 1020; background-color: var(--bs-body-bg); color: var(--bs-body-color);">
-  <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+<div class="sticky-top py-3" style="top: 0; z-index: 1020; background-color: var(--bs-body-bg);">
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-2 gap-2">
     <h2 class="mb-0">Appointments</h2>
-    <div class="d-flex gap-2 flex-wrap align-items-center">
-      <form method="get" class="row g-2 align-items-center mb-0">
-        <div class="col-auto">
-          <input type="date" id="date" name="date"
-                 class="form-control form-control-sm bg-body text-body"
-                 value="{{ data_filter|date:'Y-m-d' }}">
-        </div>
-        <div class="col-auto">
-          <input type="text" id="po" name="po"
-                 placeholder="Search P.O"
-                 class="form-control form-control-sm bg-body text-body"
-                 value="{{ request.GET.po }}">
-        </div>
-        <div class="col-auto">
-          <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
-        </div>
-        <div class="col-auto">
-          <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
-        </div>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <form method="get" class="d-flex align-items-center gap-2 mb-0 flex-wrap">
+        <input type="date" id="date" name="date"
+               class="form-control form-control-sm bg-body text-body"
+               value="{{ data_filter|date:'Y-m-d' }}">
+        <input type="text" id="po" name="po" placeholder="Search P.O"
+               class="form-control form-control-sm bg-body text-body"
+               value="{{ request.GET.po }}">
+        <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
+        <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
       </form>
       <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm px-2">📤 Export</a>
       <a href="{% url 'add_appointment' %}" class="btn btn-info btn-sm px-2">🚚 Add Load</a>
