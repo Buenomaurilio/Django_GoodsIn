@@ -194,7 +194,8 @@
   <div class="section">
     <form method="get">
       <label for="date">filter:</label>
-      <input type="date" id="date" name="date" value="{{ request.GET.date }}">
+<!--       <input type="date" id="date" name="date" value="{{ request.GET.date }}"> -->
+      <input type="date" id="date" name="date" value="{{ data_filter|date:'Y-m-d' }}">
       <button type="submit" class="btn-filter">🔍 Filter</button>
       <a href="{% url 'appointment_list' %}" class="btn-clear">🧹 Clear</a>
     </form>
