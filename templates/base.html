@@ -42,6 +42,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      background-color: #fff;
     }
 
     .content-body {
@@ -50,7 +51,7 @@
       padding: 20px;
     }
 
-    /* DARK MODE */
+    /* ==================== DARK MODE ===================== */
     body.dark-mode {
       background-color: #121212;
       color: #e0e0e0;
@@ -195,16 +196,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   function toggleTheme() {
-    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.body.classList.remove(`${currentTheme}-mode`);
-    document.body.classList.add(`${newTheme}-mode`);
-    localStorage.setItem('theme', newTheme);
+    const isDark = document.body.classList.contains('dark-mode');
+    document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
+    document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
 
+    // Atualizar Chart.js
     if (typeof Chart !== 'undefined') {
       Chart.helpers.each(Chart.instances, function (chart) {
         if (chart) {
-          const dark = newTheme === 'dark';
+          const dark = !isDark;
           if (chart.options.plugins?.legend?.labels)
             chart.options.plugins.legend.labels.color = dark ? '#e0e0e0' : '#000';
           if (chart.options.scales) {
