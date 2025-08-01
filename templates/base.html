@@ -12,26 +12,41 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-line-icons/css/simple-line-icons.css">
 
   <style>
+    /* Transição suave ao alternar tema */
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
     body.dark-mode {
       background-color: #121212;
       color: #e0e0e0;
     }
 
-    .dark-mode .bg-light {
+    .dark-mode .bg-light,
+    .dark-mode .navbar {
       background-color: #1e1e1e !important;
     }
 
-    .dark-mode .card,
-    .dark-mode table,
-    .dark-mode .navbar,
     .dark-mode .sidebar {
+      background-color: #2c2c2e;
+    }
+
+    .dark-mode .sidebar .nav-link {
+      color: #fff;
+    }
+
+    .dark-mode .nav-link.active {
+      background-color: #444;
+    }
+
+    .dark-mode .card,
+    .dark-mode table {
       background-color: #2c2c2e;
       color: #fff;
     }
 
     .dark-mode .card-title,
     .dark-mode .card-text,
-    .dark-mode h5,
     .dark-mode h2,
     .dark-mode .table th,
     .dark-mode .nav-link {
@@ -64,16 +79,40 @@
       filter: invert(1);
     }
 
-    .dark-mode canvas {
-      background-color: #2c2c2e !important;
-    }
-
-    .dark-mode .nav-link.active {
-      background-color: #444;
+    .dark-mode input::placeholder {
+      color: #ccc;
     }
 
     .dark-mode .btn {
       color: #fff;
+    }
+
+    .dark-mode .content-wrapper {
+      background-color: #121212 !important;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .sticky-top {
+      background-color: #1e1e1e !important;
+    }
+
+    .dark-mode .alert-primary {
+      background-color: #2f3e55 !important;
+      color: #ffffff;
+    }
+
+    .dark-mode .alert-info {
+      background-color: #2b4455 !important;
+      color: #ffffff;
+    }
+
+    .dark-mode .alert-secondary {
+      background-color: #3a3a3a !important;
+      color: #ffffff;
+    }
+
+    .dark-mode canvas {
+      background-color: #2c2c2e !important;
     }
 
     .toggle-theme-btn {
@@ -101,14 +140,6 @@
 
     .sidebar .nav-link {
       color: #000;
-    }
-
-    .dark-mode .sidebar {
-      background-color: #2c2c2e;
-    }
-
-    .dark-mode .sidebar .nav-link {
-      color: #fff;
     }
 
     .content-wrapper {
