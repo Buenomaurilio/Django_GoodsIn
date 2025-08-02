@@ -123,119 +123,125 @@ def dashboard_view(request):
 
     return render(request, 'appointments/dashboard.html', context)
 
-# As outras views como edit_appointment, add_appointment, add_checker, import/export etc
-# já estavam OK e não precisam ser alteradas, a menos que queira.
+@login_required
+def edit_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    data_filter = request.GET.get('date')
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect(f"/appointments/?date={data_filter}" if data_filter else 'appointment_list')
+    else:
+        form = AppointmentForm(instance=appointment)
 
-# # views.py
-# from django.shortcuts import render
-# from django.db.models import Sum, Count
-# from django.utils.timezone import now
-# from django.utils.dateparse import parse_date
-# from datetime import timedelta
-# from .models import Appointment
+    return render(request, 'appointments/edit_appointment.html', {'form': form, 'appointment': appointment})
 
-# @login_required
-# def dashboard_view(request):
-#     date_str = request.GET.get('date')
-#     selected_date = parse_date(date_str) if date_str else now().date()
+@login_required
+def add_appointment(request):
+    data_filter = request.GET.get('date')
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(f"/appointments/?date={data_filter}" if data_filter else 'appointment_list')
+    else:
+        form = AppointmentForm()
+    return render(request, 'appointments/add_appointment.html', {'form': form})
 
-#     year = selected_date.year
-#     month = selected_date.month
-#     weekday = selected_date.weekday()
-#     start_of_week = selected_date - timedelta(days=weekday)  # Monday
-#     end_of_week = start_of_week + timedelta(days=5)  # Saturday
+@login_required
+def add_checker(request):
+    data_filter = request.GET.get('date')
+    if request.method == 'POST':
+        form = CheckerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(f"/appointments/?date={data_filter}" if data_filter else 'appointment_list')
+    else:
+        form = CheckerForm()
+    return render(request, 'appointments/add_checker.html', {'form': form})
 
-#     pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-#     pallets_week = Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week)).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-#     pallets_month = Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-#     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
+@login_required
+def export_appointments_csv(request):
+    data_filter = request.GET.get('date')
+    appointments = Appointment.objects.all()
+    if data_filter:
+        appointments = appointments.filter(scheduled_date=data_filter)
 
-#     checker_month = (
-#         Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
-#         .values('checker__name')
-#         .annotate(total=Sum('qtd_pallet'))
-#         .order_by('-total')
-#     )
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="appointments.csv"'
 
-#     loads_status_day = (
-#         Appointment.objects.filter(scheduled_date=selected_date)
-#         .values('status_load')
-#         .annotate(count=Count('id'))
-#     )
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Description', 'Date', 'Time', 'P.O', 'Qty', 'Hall', 'Tipped', 'Checked', 'Checker'])
 
-#     loads_status_month = (
-#         Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
-#         .values('status_load')
-#         .annotate(count=Count('id'))
-#     )
+    for appt in appointments:
+        writer.writerow([
+            appt.id,
+            appt.description,
+            appt.scheduled_date,
+            appt.scheduled_time,
+            appt.po,
+            appt.qtd_pallet,
+            appt.hall,
+            appt.tipped,
+            appt.checked,
+            appt.checker.name if appt.checker else ''
+        ])
 
-#     loads_status_week_qs = (
-#         Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
-#         .values('status_load')
-#         .annotate(count=Count('id'))
-#     )
+    return response
 
-#     status_by_week = {
-#         'labels': [s['status_load'].title() for s in loads_status_week_qs],
-#         'datasets': [{
-#             'label': 'Status Week',
-#             'data': [s['count'] for s in loads_status_week_qs]
-#         }]
-#     }
+@login_required
+def import_appointments_csv(request):
+    data_filter = request.GET.get('date')
+    if request.method == 'POST':
+        form = CSVImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            try:
+                decoded_file = io.TextIOWrapper(file, encoding='utf-8')
+                reader = csv.DictReader(decoded_file)
 
-#     context = {
-#         'selected_date': selected_date,
-#         'pallets_today': pallets_today,
-#         'pallets_week': pallets_week,
-#         'pallets_month': pallets_month,
-#         'pallets_total': pallets_total,
-#         'checker_month': checker_month,
-#         'loads_status_day': loads_status_day,
-#         'loads_status_month': loads_status_month,
-#         'status_by_week': status_by_week,
-#     }
+                for row in reader:
+                    try:
+                        Appointment.objects.create(
+                            description=row['Description'],
+                            scheduled_date=parse_date(row['Date']),
+                            scheduled_time=parse_time(row['Time']),
+                            po=row['P.O'],
+                            qtd_pallet=int(row['Qty']),
+                            hall=row.get('Hall', '')
+                        )
+                    except Exception as e:
+                        messages.warning(request, f"Erro ao importar linha {row}: {e}")
 
-#     return render(request, 'appointments/dashboard.html', context)
+                messages.success(request, "Appointments imported successfully.")
+                return redirect(f"/appointments/?date={data_filter}" if data_filter else 'appointment_list')
+            except Exception as e:
+                messages.error(request, f"Erro ao processar arquivo: {e}")
+                return redirect(f"/appointments/?date={data_filter}" if data_filter else 'appointment_list')
+    else:
+        form = CSVImportForm()
 
-# @login_required
-# def dashboard_view(request):
-#     date_str = request.GET.get('date')
-#     selected_date = parse_date(date_str) if date_str else now().date()
+    return render(request, 'appointments/import_csv.html', {'form': form})
 
-#     month = selected_date.month
-#     year = selected_date.year
+@login_required
+def delete_appointment(request, pk):
+    data_filter = request.GET.get('date')
+    appointment = get_object_or_404(Appointment, pk=pk)
+    appointment.delete()
+    messages.success(request, "Appointment deleted successfully.")
+    return redirect(f"/appointments/?date={data_filter}" if data_filter else 'appointment_list')
 
-#     pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-#     pallets_month = Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-#     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
+@login_required
+def appointment_table_partial(request):
+    data_filter = request.GET.get('date')
+    if data_filter:
+        appointments = Appointment.objects.filter(scheduled_date=data_filter).order_by('scheduled_time')
+    else:
+        appointments = Appointment.objects.all().order_by('-scheduled_date', '-scheduled_time')
 
-#     checker_month = (
-#         Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
-#         .values('checker__name')
-#         .annotate(total=Sum('qtd_pallet'))
-#         .order_by('-total')
-#     )
-
-#     loads_status_day = (
-#         Appointment.objects.filter(scheduled_date=selected_date)
-#         .values('status_load')
-#         .annotate(count=Count('id'))
-#     )
-
-#     loads_status_month = (
-#         Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
-#         .values('status_load')
-#         .annotate(count=Count('id'))
-#     )
-
-#     context = {
-#         'selected_date': selected_date,
-#         'pallets_today': pallets_today,
-#         'pallets_month': pallets_month,
-#         'pallets_total': pallets_total,
-#         'checker_month': checker_month,
-#         'loads_status_day': loads_status_day,
-#         'loads_status_month': loads_status_month,
-#     }
-
-#     return render(request, 'appointments/dashboard.html', context)
+    return JsonResponse({
+        'table_html': render_to_string('appointments/appointment_table_partial.html', {
+            'appointments': appointments
+        })
+    })
