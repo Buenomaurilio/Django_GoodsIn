@@ -174,6 +174,14 @@ def appointment_table_partial(request):
     })
 
 
+# views.py
+from django.shortcuts import render
+from django.db.models import Sum, Count
+from django.utils.timezone import now
+from django.utils.dateparse import parse_date
+from datetime import timedelta
+from .models import Appointment
+
 @login_required
 def dashboard_view(request):
     date_str = request.GET.get('date')
@@ -181,64 +189,45 @@ def dashboard_view(request):
 
     year = selected_date.year
     month = selected_date.month
+    weekday = selected_date.weekday()
+    start_of_week = selected_date - timedelta(days=weekday)  # Monday
+    end_of_week = start_of_week + timedelta(days=5)  # Saturday
 
-    # Semana atual: segunda (weekday 0) até sábado (weekday 5)
-    start_of_week = selected_date - timedelta(days=selected_date.weekday())
-    end_of_week = start_of_week + timedelta(days=5)
-
-    # Pallets
     pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_week = Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week)).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_month = Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
 
-    # Pallets por checker - semanal
-    checker_week = (
-        Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
+    checker_month = (
+        Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
         .values('checker__name')
         .annotate(total=Sum('qtd_pallet'))
         .order_by('-total')
     )
 
-    # Pallets por checker - diário na semana
-    checker_day_data = {}
-    for i in range(6):  # Segunda a Sábado
-        day = start_of_week + timedelta(days=i)
-        for entry in Appointment.objects.filter(scheduled_date=day).values('checker__name').annotate(total=Sum('qtd_pallet')):
-            name = entry['checker__name'] or 'No Checker'
-            checker_day_data.setdefault(name, [0] * 6)[i] = entry['total']
+    loads_status_day = (
+        Appointment.objects.filter(scheduled_date=selected_date)
+        .values('status_load')
+        .annotate(count=Count('id'))
+    )
 
-    checker_day_chart = {
-        'labels': [f"{(start_of_week + timedelta(days=i)).strftime('%a')}" for i in range(6)],
-        'datasets': [
-            {
-                'label': name,
-                'data': values
-            } for name, values in checker_day_data.items()
-        ]
-    }
+    loads_status_month = (
+        Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
+        .values('status_load')
+        .annotate(count=Count('id'))
+    )
 
-    # Gráfico de checker semanal
-    checker_week_chart = {
-        'labels': [entry['checker__name'] or 'No Checker' for entry in checker_week],
-        'datasets': [{
-            'label': 'Pallets',
-            'data': [entry['total'] for entry in checker_week]
-        }]
-    }
-
-    # Loads por status na semana
-    loads_status_week = (
+    loads_status_week_qs = (
         Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
         .values('status_load')
         .annotate(count=Count('id'))
     )
 
-    status_chart = {
-        'labels': [entry['status_load'].capitalize() for entry in loads_status_week],
+    status_by_week = {
+        'labels': [s['status_load'].title() for s in loads_status_week_qs],
         'datasets': [{
-            'label': 'Loads',
-            'data': [entry['count'] for entry in loads_status_week]
+            'label': 'Status Week',
+            'data': [s['count'] for s in loads_status_week_qs]
         }]
     }
 
@@ -248,11 +237,10 @@ def dashboard_view(request):
         'pallets_week': pallets_week,
         'pallets_month': pallets_month,
         'pallets_total': pallets_total,
-
-        # Gráficos
-        'status_by_week': status_chart,
-        'checker_day_data': checker_day_chart,
-        'checker_week_data': checker_week_chart,
+        'checker_month': checker_month,
+        'loads_status_day': loads_status_day,
+        'loads_status_month': loads_status_month,
+        'status_by_week': status_by_week,
     }
 
     return render(request, 'appointments/dashboard.html', context)
