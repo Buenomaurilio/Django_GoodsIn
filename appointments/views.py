@@ -168,45 +168,80 @@ def appointment_table_partial(request):
         })
     })
 
-@login_required
+from datetime import date, timedelta
+from django.db.models import Sum
+from .models import Appointment  # ajuste conforme seu app
+
 def dashboard_view(request):
-    date_str = request.GET.get('date')
-    selected_date = parse_date(date_str) if date_str else now().date()
+    today = date.today()
 
-    month = selected_date.month
-    year = selected_date.year
+    # Começo da semana: segunda-feira
+    start_of_week = today - timedelta(days=today.weekday())
+    # Fim da semana: sábado (segunda + 5 dias)
+    end_of_week = start_of_week + timedelta(days=5)
 
-    pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-    pallets_month = Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    # Soma dos pallets agendados entre segunda e sábado da semana atual
+    pallets_week = Appointment.objects.filter(
+        scheduled_date__range=[start_of_week, end_of_week]
+    ).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+
+    # Exemplo das outras métricas já existentes
+    pallets_today = Appointment.objects.filter(scheduled_date=today).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    pallets_month = Appointment.objects.filter(scheduled_date__month=today.month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
 
-    checker_month = (
-        Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
-        .values('checker__name')
-        .annotate(total=Sum('qtd_pallet'))
-        .order_by('-total')
-    )
-
-    loads_status_day = (
-        Appointment.objects.filter(scheduled_date=selected_date)
-        .values('status_load')
-        .annotate(count=Count('id'))
-    )
-
-    loads_status_month = (
-        Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
-        .values('status_load')
-        .annotate(count=Count('id'))
-    )
-
     context = {
-        'selected_date': selected_date,
+        'pallets_week': pallets_week,
         'pallets_today': pallets_today,
         'pallets_month': pallets_month,
         'pallets_total': pallets_total,
-        'checker_month': checker_month,
-        'loads_status_day': loads_status_day,
-        'loads_status_month': loads_status_month,
-    }
 
+        # Dados dos gráficos
+        'status_by_week': {},  # substitua depois
+        'checker_day_data': {},
+        'checker_week_data': {},
+    }
     return render(request, 'appointments/dashboard.html', context)
+
+# @login_required
+# def dashboard_view(request):
+#     date_str = request.GET.get('date')
+#     selected_date = parse_date(date_str) if date_str else now().date()
+
+#     month = selected_date.month
+#     year = selected_date.year
+
+#     pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+#     pallets_month = Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+#     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
+
+#     checker_month = (
+#         Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
+#         .values('checker__name')
+#         .annotate(total=Sum('qtd_pallet'))
+#         .order_by('-total')
+#     )
+
+#     loads_status_day = (
+#         Appointment.objects.filter(scheduled_date=selected_date)
+#         .values('status_load')
+#         .annotate(count=Count('id'))
+#     )
+
+#     loads_status_month = (
+#         Appointment.objects.filter(scheduled_date__month=month, scheduled_date__year=year)
+#         .values('status_load')
+#         .annotate(count=Count('id'))
+#     )
+
+#     context = {
+#         'selected_date': selected_date,
+#         'pallets_today': pallets_today,
+#         'pallets_month': pallets_month,
+#         'pallets_total': pallets_total,
+#         'checker_month': checker_month,
+#         'loads_status_day': loads_status_day,
+#         'loads_status_month': loads_status_month,
+#     }
+
+#     return render(request, 'appointments/dashboard.html', context)
