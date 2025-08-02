@@ -1,78 +1,135 @@
-# views.py
-from django.shortcuts import render
-from django.db.models import Sum, Count
-from django.utils.timezone import now
-from django.utils.dateparse import parse_date
-from datetime import timedelta
-from .models import Appointment
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold">Dashboard</h2>
+</div>
 
-@login_required
-def dashboard_view(request):
-    date_str = request.GET.get('date')
-    selected_date = parse_date(date_str) if date_str else now().date()
+<form method="get" class="d-flex align-items-center gap-2 mb-4">
+  <input type="date" id="date" name="date" class="form-control form-control-sm" value="{{ selected_date|date:'Y-m-d' }}">
+  <button type="submit" class="btn btn-primary btn-sm">🔍 Filter</button>
+</form>
 
-    year = selected_date.year
-    month = selected_date.month
-    weekday = selected_date.weekday()
-    start_of_week = selected_date - timedelta(days=weekday)  # Monday
-    end_of_week = start_of_week + timedelta(days=5)  # Saturday
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Pallets Today</h5>
+        <p class="card-text fs-4">{{ pallets_today }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Pallets This Week</h5>
+        <p class="card-text fs-4">{{ pallets_week }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-dark bg-warning">
+      <div class="card-body">
+        <h5 class="card-title">Pallets This Month</h5>
+        <p class="card-text fs-4">{{ pallets_month }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <h5 class="card-title">Total Pallets</h5>
+        <p class="card-text fs-4">{{ pallets_total }}</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-    pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-    pallets_week = Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week)).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-    pallets_month = Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-    pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
+<div class="card mb-4">
+  <div class="card-header fw-semibold">Pallets by Checker (Month)</div>
+  <div class="card-body">
+    <canvas id="checkerChartMonth"></canvas>
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-header fw-semibold">Pallets by Checker (Week)</div>
+  <div class="card-body">
+    <canvas id="checkerChartWeek"></canvas>
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-header fw-semibold">Pallets by Checker (Day)</div>
+  <div class="card-body">
+    <canvas id="checkerChartDay"></canvas>
+  </div>
+</div>
 
-    checker_month = (
-        Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
-        .values('checker__name')
-        .annotate(total=Sum('qtd_pallet'))
-        .order_by('-total')
-    )
+<div class="row">
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      <div class="card-header fw-semibold">Status Loads (Today)</div>
+      <div class="card-body">
+        <canvas id="statusDayChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      <div class="card-header fw-semibold">Status Loads (Week)</div>
+      <div class="card-body">
+        <canvas id="statusWeekChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      <div class="card-header fw-semibold">Status Loads (Month)</div>
+      <div class="card-body">
+        <canvas id="statusMonthChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
-    checker_day = (
-        Appointment.objects.filter(scheduled_date=selected_date)
-        .values('checker__name')
-        .annotate(total=Sum('qtd_pallet'))
-        .order_by('-total')
-    )
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function getChartOptions() {
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#e0e0e0' : '#000';
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: textColor } }
+      },
+      scales: {
+        x: { ticks: { color: textColor } },
+        y: { ticks: { color: textColor } }
+      }
+    };
+  }
 
-    checker_week = (
-        Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
-        .values('checker__name')
-        .annotate(total=Sum('qtd_pallet'))
-        .order_by('-total')
-    )
+  function renderBarChart(id, labels, data, label) {
+    new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: label,
+          data: data,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }]
+      },
+      options: getChartOptions()
+    });
+  }
 
-    loads_status_day = (
-        Appointment.objects.filter(scheduled_date=selected_date)
-        .values('status_load')
-        .annotate(count=Count('id'))
-    )
+  renderBarChart('checkerChartMonth', [{% for c in checker_month %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_month %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Month');
+  renderBarChart('checkerChartWeek', [{% for c in checker_week %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_week %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week');
+  renderBarChart('checkerChartDay', [{% for c in checker_day %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_day %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Day');
 
-    loads_status_month = (
-        Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
-        .values('status_load')
-        .annotate(count=Count('id'))
-    )
-
-    loads_status_week = (
-        Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
-        .values('status_load')
-        .annotate(count=Count('id'))
-    )
-
-    context = {
-        'selected_date': selected_date,
-        'pallets_today': pallets_today,
-        'pallets_week': pallets_week,
-        'pallets_month': pallets_month,
-        'pallets_total': pallets_total,
-        'checker_day': checker_day,
-        'checker_week': checker_week,
-        'checker_month': checker_month,
-        'loads_status_day': loads_status_day,
-        'loads_status_week': loads_status_week,
-        'loads_status_month': loads_status_month,
-    }
-
-    return render(request, 'appointments/dashboard.html', context)
+  renderBarChart('statusDayChart', [{% for s in loads_status_day %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_day %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Today');
+  renderBarChart('statusWeekChart', [{% for s in loads_status_week %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_week %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week');
+  renderBarChart('statusMonthChart', [{% for s in loads_status_month %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_month %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Month');
+</script>
+{% endblock %}
