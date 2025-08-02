@@ -14,20 +14,20 @@
         <input type="text" id="po" name="po" placeholder="Search P.O"
                class="form-control form-control-sm"
                value="{{ request.GET.po }}">
-        <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
-        <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
+        <button type="submit" class="btn btn-sm btn-outline-primary px-2">🔍 Filter</button>
+        <a href="{% url 'appointment_list' %}" class="btn btn-sm btn-outline-secondary px-2">🧹 Clear</a>
       </form>
 
-      <form method="post" enctype="multipart/form-data" action="{% url 'import_appointments_csv' %}" class="d-flex gap-2 align-items-center">
+      <form method="post" enctype="multipart/form-data" action="{% url 'import_appointments_csv' %}" class="d-flex align-items-center gap-2">
         {% csrf_token %}
         <input type="file" name="file" class="form-control form-control-sm" required style="max-width: 200px;">
-        <button type="submit" class="btn btn-secondary btn-sm px-2">📥 Upload</button>
+        <button type="submit" class="btn btn-sm btn-outline-dark px-2">📥 Upload</button>
       </form>
 
       <div class="d-flex gap-2">
-        <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm px-2">📤 Export</a>
-        <a href="{% url 'add_appointment' %}" class="btn btn-info btn-sm px-2">🚚 Add Load</a>
-        <a href="{% url 'add_checker' %}" class="btn btn-warning btn-sm px-2">➕ Add Checker</a>
+        <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-sm btn-outline-success px-2">📤 Export</a>
+        <a href="{% url 'add_appointment' %}" class="btn btn-sm btn-outline-info px-2">🚚 Add Load</a>
+        <a href="{% url 'add_checker' %}" class="btn btn-sm btn-outline-warning px-2">➕ Add Checker</a>
       </div>
     </div>
   </div>
