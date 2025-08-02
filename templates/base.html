@@ -15,6 +15,7 @@
     html, body {
       height: 100%;
       margin: 0;
+      overflow: hidden;
     }
 
     body {
@@ -24,13 +25,13 @@
     .wrapper {
       display: flex;
       height: 100%;
-      overflow: hidden;
     }
 
     .sidebar {
       flex: 0 0 200px;
       padding-top: 56px;
       background-color: #f8f9fa;
+      overflow-y: auto;
     }
 
     .sidebar .nav-link {
@@ -41,8 +42,10 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      background-color: #fff;
+    }
+
+    .navbar {
+      height: 56px;
     }
 
     .content-body {
@@ -51,7 +54,7 @@
       padding: 20px;
     }
 
-    /* ==================== DARK MODE ===================== */
+    /* DARK MODE */
     body.dark-mode {
       background-color: #121212;
       color: #e0e0e0;
@@ -77,14 +80,6 @@
     .dark-mode .card,
     .dark-mode table {
       background-color: #2c2c2e;
-      color: #fff;
-    }
-
-    .dark-mode .card-title,
-    .dark-mode .card-text,
-    .dark-mode h2,
-    .dark-mode .table th,
-    .dark-mode .nav-link {
       color: #fff;
     }
 
@@ -120,15 +115,6 @@
 
     .dark-mode .btn {
       color: #fff;
-    }
-
-    .dark-mode .content-wrapper {
-      background-color: #121212 !important;
-      color: #e0e0e0;
-    }
-
-    .dark-mode .sticky-top {
-      background-color: #1e1e1e !important;
     }
 
     .dark-mode .alert-primary {
@@ -196,16 +182,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   function toggleTheme() {
-    const isDark = document.body.classList.contains('dark-mode');
-    document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-    document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.classList.remove(`${currentTheme}-mode`);
+    document.body.classList.add(`${newTheme}-mode`);
+    localStorage.setItem('theme', newTheme);
 
-    // Atualizar Chart.js
     if (typeof Chart !== 'undefined') {
       Chart.helpers.each(Chart.instances, function (chart) {
         if (chart) {
-          const dark = !isDark;
+          const dark = newTheme === 'dark';
           if (chart.options.plugins?.legend?.labels)
             chart.options.plugins.legend.labels.color = dark ? '#e0e0e0' : '#000';
           if (chart.options.scales) {
