@@ -1,151 +1,144 @@
-{% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="fw-bold">Dashboard</h2>
-</div>
 
-<form method="get" class="d-flex align-items-center gap-2 mb-4">
-  <input type="date" id="date" name="date" class="form-control form-control-sm" value="{{ selected_date|date:'Y-m-d' }}">
-  <button type="submit" class="btn btn-primary btn-sm">🔍 Filter</button>
-</form>
+<!-- Header e Filtros fixos -->
+<div class="sticky-top py-3 dark-bg" style="top: 0; z-index: 1020;">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+    <h2 class="mb-0">Appointments</h2>
 
-<div class="row mb-4">
-  <div class="col-md-3">
-    <div class="card text-white bg-success">
-      <div class="card-body">
-        <h5 class="card-title">Pallets Today</h5>
-        <p class="card-text fs-4">{{ pallets_today }}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="card text-white bg-primary">
-      <div class="card-body">
-        <h5 class="card-title">Pallets This Week</h5>
-        <p class="card-text fs-4">{{ pallets_week }}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="card text-dark bg-warning">
-      <div class="card-body">
-        <h5 class="card-title">Pallets This Month</h5>
-        <p class="card-text fs-4">{{ pallets_month }}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="card text-white bg-info">
-      <div class="card-body">
-        <h5 class="card-title">Total Pallets</h5>
-        <p class="card-text fs-4">{{ pallets_total }}</p>
-      </div>
-    </div>
-  </div>
-</div>
+    <div class="w-100 d-flex flex-wrap justify-content-between align-items-center gap-2">
 
-<div class="card mb-4">
-  <div class="card-header fw-semibold">Pallets by Checker (Month)</div>
-  <div class="card-body">
-    <canvas id="checkerChartMonth"></canvas>
-  </div>
-</div>
-<div class="card mb-4">
-  <div class="card-header fw-semibold">Pallets by Checker (Week)</div>
-  <div class="card-body">
-    <canvas id="checkerChartWeek"></canvas>
-  </div>
-</div>
-<div class="card mb-4">
-  <div class="card-header fw-semibold">Pallets by Checker (Day)</div>
-  <div class="card-body">
-    <canvas id="checkerChartDay"></canvas>
-  </div>
-</div>
+      <!-- Formulário de Filtro (GET) -->
+      <form method="get" class="d-flex align-items-center gap-2">
+        <input type="date" id="date" name="date"
+               class="form-control form-control-sm w-auto"
+               value="{{ data_filter|date:'Y-m-d' }}">
+        <input type="text" id="po" name="po" placeholder="Search P.O"
+               class="form-control form-control-sm w-auto"
+               value="{{ request.GET.po }}">
+        <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
+        <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
+      </form>
 
-<div class="row">
-  <div class="col-md-4 mb-4">
-    <div class="card">
-      <div class="card-header fw-semibold">Status Loads (Today)</div>
-      <div class="card-body">
-        <canvas id="statusDayChart"></canvas>
+      <!-- Formulário de Upload (POST) -->
+      <form method="post" enctype="multipart/form-data" action="{% url 'import_appointments_csv' %}" class="d-flex align-items-center gap-2">
+        {% csrf_token %}
+        <input type="file" name="file" class="form-control form-control-sm w-auto" required style="max-width: 180px;">
+        <button type="submit" class="btn btn-sm btn-secondary px-2">📥 Upload</button>
+      </form>
+
+      <!-- Outros botões -->
+      <div class="d-flex gap-2">
+        <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-sm btn-success px-2">📤 Export</a>
+        <a href="{% url 'add_appointment' %}" class="btn btn-sm btn-info px-2">🚚 Add Load</a>
+        <a href="{% url 'add_checker' %}" class="btn btn-sm btn-warning px-2">➕ Add Checker</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="row mb-2">
+    <div class="col">
+      <div class="alert alert-primary text-center py-2 mb-1">
+        <strong>Pallets Today:</strong> {{ pallets_today }}
+      </div>
+    </div>
+    <div class="col">
+      <div class="alert alert-info text-center py-2 mb-1">
+        <strong>Pallets This Week:</strong> {{ pallets_week }}
+      </div>
+    </div>
+    <div class="col">
+      <div class="alert alert-secondary text-center py-2 mb-1">
+        <strong>Pallets This Month:</strong> {{ pallets_month }}
+      </div>
+    </div>
+    <div class="col">
+      <div class="alert alert-dark text-center py-2 mb-1">
+        <strong>Total Pallets:</strong> {{ pallets_total }}
       </div>
     </div>
   </div>
-  <div class="col-md-4 mb-4">
-    <div class="card">
-      <div class="card-header fw-semibold">Status Loads (Week)</div>
-      <div class="card-body">
-        <canvas id="statusWeekChart"></canvas>
+
+  <!-- LOADS KPIs -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="alert alert-success text-center py-2 mb-1">
+        <strong>Loads Today:</strong> {{ loads_today }}
       </div>
     </div>
-  </div>
-  <div class="col-md-4 mb-4">
-    <div class="card">
-      <div class="card-header fw-semibold">Status Loads (Month)</div>
-      <div class="card-body">
-        <canvas id="statusMonthChart"></canvas>
+    <div class="col">
+      <div class="alert alert-warning text-center py-2 mb-1">
+        <strong>Loads This Week:</strong> {{ loads_week }}
+      </div>
+    </div>
+    <div class="col">
+      <div class="alert alert-info text-center py-2 mb-1">
+        <strong>Loads This Month:</strong> {{ loads_month }}
+      </div>
+    </div>
+    <div class="col">
+      <div class="alert alert-secondary text-center py-2 mb-1">
+        <strong>Total Loads:</strong> {{ loads_total }}
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  function getChartOptions() {
-    const isDark = document.body.classList.contains('dark-mode');
-    const textColor = isDark ? '#e0e0e0' : '#000';
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: textColor } }
-      },
-      scales: {
-        x: { ticks: { color: textColor } },
-        y: { ticks: { color: textColor } }
-      }
-    };
-  }
+<!-- Tabela com cabeçalho fixo e rolagem de dados -->
+<div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+  <table class="table table-striped table-bordered mb-0">
+    <thead class="table-primary" style="position: sticky; top: 0; z-index: 1;">
+      <tr class="text-center">
+        <th>ID</th>
+        <th>Description</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>P.O</th>
+        <th>Qty</th>
+        <th>Hall</th>
+        <th>Tipped</th>
+        <th>Checked</th>
+        <th>Checker</th>
+        <th>Arrival</th>
+        <th>Checkout</th>
+        <th>Bay</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for appt in appointments %}
+      <tr class="text-center">
+        <td>{{ appt.id }}</td>
+        <td>{{ appt.description }}</td>
+        <td>{{ appt.scheduled_date|date:"d/m/Y" }}</td>
+        <td>{{ appt.scheduled_time|time:"H:i" }}</td>
+        <td>{{ appt.po }}</td>
+        <td>{{ appt.qtd_pallet }}</td>
+        <td>{{ appt.hall }}</td>
+        <td class="fw-bold" style="color: {% if appt.tipped %}green{% else %}red{% endif %};">
+          {% if appt.tipped %}Yes{% else %}No{% endif %}
+        </td>
+        <td class="fw-bold" style="color: {% if appt.checked %}green{% else %}red{% endif %};">
+          {% if appt.checked %}Yes{% else %}No{% endif %}
+        </td>
+        <td>{{ appt.checker }}</td>
+        <td>{{ appt.arrival_time|time:"H:i" }}</td>
+        <td>{{ appt.check_out_time|time:"H:i" }}</td>
+        <td>{{ appt.bay1 }}</td>
+        <td>{{ appt.status_load|title }}</td>
+        <td>
+          <a href="{% url 'edit_appointment' appt.id %}" class="btn btn-sm btn-primary">Edit</a>
+          <a href="{% url 'delete_appointment' appt.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="15" class="text-center">No appointments found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
-  function getColorArrayFromLabels(labels) {
-    const colorMap = {
-      'On Time': '#28a745',
-      'Rescheduled': '#ffc107',
-      'Canceled': '#fd7e14',
-      'No Show Up': '#dc3545'
-    };
-    return labels.map(label => colorMap[label] || '#007bff');
-  }
-
-  function getColorArray(count) {
-    const baseColors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'];
-    return Array.from({length: count}, (_, i) => baseColors[i % baseColors.length]);
-  }
-
-  function renderBarChart(id, labels, data, label, useStatusColors = false) {
-    const backgroundColor = useStatusColors ? getColorArrayFromLabels(labels) : getColorArray(data.length);
-    new Chart(document.getElementById(id), {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: label,
-          data: data,
-          backgroundColor: backgroundColor
-        }]
-      },
-      options: getChartOptions()
-    });
-  }
-
-  renderBarChart('checkerChartMonth', [{% for c in checker_month %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_month %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Month');
-  renderBarChart('checkerChartWeek', [{% for c in checker_week %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_week %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week');
-  renderBarChart('checkerChartDay', [{% for c in checker_day %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_day %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Day');
-
-  renderBarChart('statusDayChart', [{% for s in loads_status_day %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_day %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Today', true);
-  renderBarChart('statusWeekChart', [{% for s in loads_status_week %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_week %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week', true);
-  renderBarChart('statusMonthChart', [{% for s in loads_status_month %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_month %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Month', true);
-</script>
 {% endblock %}
