@@ -173,7 +173,6 @@ def appointment_table_partial(request):
         })
     })
 
-
 # views.py
 from django.shortcuts import render
 from django.db.models import Sum, Count
@@ -205,6 +204,20 @@ def dashboard_view(request):
         .order_by('-total')
     )
 
+    checker_day = (
+        Appointment.objects.filter(scheduled_date=selected_date)
+        .values('checker__name')
+        .annotate(total=Sum('qtd_pallet'))
+        .order_by('-total')
+    )
+
+    checker_week = (
+        Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
+        .values('checker__name')
+        .annotate(total=Sum('qtd_pallet'))
+        .order_by('-total')
+    )
+
     loads_status_day = (
         Appointment.objects.filter(scheduled_date=selected_date)
         .values('status_load')
@@ -217,19 +230,11 @@ def dashboard_view(request):
         .annotate(count=Count('id'))
     )
 
-    loads_status_week_qs = (
+    loads_status_week = (
         Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
         .values('status_load')
         .annotate(count=Count('id'))
     )
-
-    status_by_week = {
-        'labels': [s['status_load'].title() for s in loads_status_week_qs],
-        'datasets': [{
-            'label': 'Status Week',
-            'data': [s['count'] for s in loads_status_week_qs]
-        }]
-    }
 
     context = {
         'selected_date': selected_date,
@@ -237,13 +242,86 @@ def dashboard_view(request):
         'pallets_week': pallets_week,
         'pallets_month': pallets_month,
         'pallets_total': pallets_total,
+        'checker_day': checker_day,
+        'checker_week': checker_week,
         'checker_month': checker_month,
         'loads_status_day': loads_status_day,
+        'loads_status_week': loads_status_week,
         'loads_status_month': loads_status_month,
-        'status_by_week': status_by_week,
     }
 
     return render(request, 'appointments/dashboard.html', context)
+
+# # views.py
+# from django.shortcuts import render
+# from django.db.models import Sum, Count
+# from django.utils.timezone import now
+# from django.utils.dateparse import parse_date
+# from datetime import timedelta
+# from .models import Appointment
+
+# @login_required
+# def dashboard_view(request):
+#     date_str = request.GET.get('date')
+#     selected_date = parse_date(date_str) if date_str else now().date()
+
+#     year = selected_date.year
+#     month = selected_date.month
+#     weekday = selected_date.weekday()
+#     start_of_week = selected_date - timedelta(days=weekday)  # Monday
+#     end_of_week = start_of_week + timedelta(days=5)  # Saturday
+
+#     pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+#     pallets_week = Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week)).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+#     pallets_month = Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+#     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
+
+#     checker_month = (
+#         Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
+#         .values('checker__name')
+#         .annotate(total=Sum('qtd_pallet'))
+#         .order_by('-total')
+#     )
+
+#     loads_status_day = (
+#         Appointment.objects.filter(scheduled_date=selected_date)
+#         .values('status_load')
+#         .annotate(count=Count('id'))
+#     )
+
+#     loads_status_month = (
+#         Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month)
+#         .values('status_load')
+#         .annotate(count=Count('id'))
+#     )
+
+#     loads_status_week_qs = (
+#         Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
+#         .values('status_load')
+#         .annotate(count=Count('id'))
+#     )
+
+#     status_by_week = {
+#         'labels': [s['status_load'].title() for s in loads_status_week_qs],
+#         'datasets': [{
+#             'label': 'Status Week',
+#             'data': [s['count'] for s in loads_status_week_qs]
+#         }]
+#     }
+
+#     context = {
+#         'selected_date': selected_date,
+#         'pallets_today': pallets_today,
+#         'pallets_week': pallets_week,
+#         'pallets_month': pallets_month,
+#         'pallets_total': pallets_total,
+#         'checker_month': checker_month,
+#         'loads_status_day': loads_status_day,
+#         'loads_status_month': loads_status_month,
+#         'status_by_week': status_by_week,
+#     }
+
+#     return render(request, 'appointments/dashboard.html', context)
 
 # @login_required
 # def dashboard_view(request):
