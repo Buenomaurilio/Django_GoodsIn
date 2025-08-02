@@ -62,7 +62,7 @@
   </div>
 </div>
 
-<!-- Gráficos -->
+<!-- Gráficos: Checker por período -->
 <div class="row">
   <div class="col-md-6">
     <canvas id="checkerChartDay"></canvas>
@@ -78,6 +78,7 @@
   </div>
 </div>
 
+<!-- Gráficos: Status por período -->
 <div class="row mt-4">
   <div class="col-md-4">
     <canvas id="statusChartDay"></canvas>
@@ -90,6 +91,7 @@
   </div>
 </div>
 
+<!-- Scripts -->
 <script>
   const checkerDayData = {{ checker_day|safe }};
   const checkerWeekData = {{ checker_week|safe }};
