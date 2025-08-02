@@ -55,8 +55,12 @@
     }
 
     /* DARK MODE */
+    html.dark-mode,
     body.dark-mode {
-      background-color: #121212;
+      background-color: #121212 !important;
+    }
+
+    .dark-mode {
       color: #e0e0e0;
     }
 
@@ -186,6 +190,8 @@
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.body.classList.remove(`${currentTheme}-mode`);
     document.body.classList.add(`${newTheme}-mode`);
+    document.documentElement.classList.remove(`${currentTheme}-mode`);
+    document.documentElement.classList.add(`${newTheme}-mode`);
     localStorage.setItem('theme', newTheme);
 
     if (typeof Chart !== 'undefined') {
@@ -207,6 +213,7 @@
   function applySavedTheme() {
     const saved = localStorage.getItem('theme') || 'light';
     document.body.classList.add(`${saved}-mode`);
+    document.documentElement.classList.add(`${saved}-mode`);
   }
 </script>
 </body>
