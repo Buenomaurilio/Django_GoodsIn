@@ -1,97 +1,165 @@
-<!-- Dashboard Template -->
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="container-fluid">
-  <div class="row g-3 mb-4">
-    <!-- Cards -->
-    <div class="col-md-3">
-      <div class="card text-bg-primary h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">Pallets Today</h5>
-          <h2 id="palletsToday">{{ pallets_today }}</h2>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-bg-info h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">Pallets This Week</h5>
-          <h2 id="palletsWeek">{{ pallets_week }}</h2>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-bg-secondary h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">Pallets This Month</h5>
-          <h2 id="palletsMonth">{{ pallets_month }}</h2>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-bg-dark h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">Total Pallets</h5>
-          <h2 id="palletsTotal">{{ pallets_total }}</h2>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold">Dashboard</h2>
+</div>
+
+<form method="get" class="d-flex align-items-center gap-2 mb-4">
+  <input type="date" id="date" name="date" class="form-control form-control-sm" value="{{ selected_date|date:'Y-m-d' }}">
+  <button type="submit" class="btn btn-primary btn-sm">🔍 Filter</button>
+</form>
+
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Pallets Today</h5>
+        <p class="card-text fs-4">{{ pallets_today }}</p>
       </div>
     </div>
   </div>
-
-  <!-- Charts -->
-  <div class="row g-4">
-    <div class="col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Loads by Status (Weekly)</h5>
-          <canvas id="statusByWeekChart" height="250"></canvas>
-        </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Pallets This Week</h5>
+        <p class="card-text fs-4">{{ pallets_week }}</p>
       </div>
     </div>
-    <div class="col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Pallets by Checker (Daily)</h5>
-          <canvas id="palletsByCheckerDayChart" height="250"></canvas>
-        </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-dark bg-warning">
+      <div class="card-body">
+        <h5 class="card-title">Pallets This Month</h5>
+        <p class="card-text fs-4">{{ pallets_month }}</p>
       </div>
     </div>
-    <div class="col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Pallets by Checker (Weekly)</h5>
-          <canvas id="palletsByCheckerWeekChart" height="250"></canvas>
-        </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <h5 class="card-title">Total Pallets</h5>
+        <p class="card-text fs-4">{{ pallets_total }}</p>
       </div>
     </div>
   </div>
 </div>
 
+<div class="card mb-4">
+  <div class="card-header fw-semibold">Pallets by Checker (Month)</div>
+  <div class="card-body">
+    <canvas id="checkerChart"></canvas>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header fw-semibold">Status Loads (Today)</div>
+      <div class="card-body">
+        <canvas id="statusDayChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header fw-semibold">Status Loads (Month)</div>
+      <div class="card-body">
+        <canvas id="statusMonthChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-12 mb-4">
+    <div class="card">
+      <div class="card-header fw-semibold">Status Loads (Week)</div>
+      <div class="card-body">
+        <canvas id="statusWeekChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // You’ll replace the placeholders below with actual data via context variables or AJAX
-  const statusByWeekData = {{ status_by_week|safe }};
-  const checkerDayData = {{ checker_day_data|safe }};
-  const checkerWeekData = {{ checker_week_data|safe }};
+  function getChartOptions() {
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#e0e0e0' : '#000';
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      backgroundColor: 'transparent',
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: textColor
+          }
+        },
+        y: {
+          ticks: {
+            color: textColor
+          }
+        }
+      }
+    };
+  }
 
-  const statusByWeekChart = new Chart(
-    document.getElementById('statusByWeekChart'), {
-      type: 'bar',
-      data: statusByWeekData,
-      options: { responsive: true, plugins: { legend: { display: true } } }
-    });
+  new Chart(document.getElementById('checkerChart'), {
+    type: 'bar',
+    data: {
+      labels: [{% for c in checker_month %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+      datasets: [{
+        label: 'Pallets',
+        data: [{% for c in checker_month %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+      }]
+    },
+    options: getChartOptions()
+  });
 
-  const palletsByCheckerDayChart = new Chart(
-    document.getElementById('palletsByCheckerDayChart'), {
-      type: 'bar',
-      data: checkerDayData,
-      options: { responsive: true, plugins: { legend: { display: true } } }
-    });
+  new Chart(document.getElementById('statusDayChart'), {
+    type: 'bar',
+    data: {
+      labels: [{% for s in loads_status_day %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+      datasets: [{
+        label: 'Status Today',
+        data: [{% for s in loads_status_day %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+      }]
+    },
+    options: getChartOptions()
+  });
 
-  const palletsByCheckerWeekChart = new Chart(
-    document.getElementById('palletsByCheckerWeekChart'), {
-      type: 'bar',
-      data: checkerWeekData,
-      options: { responsive: true, plugins: { legend: { display: true } } }
-    });
+  new Chart(document.getElementById('statusMonthChart'), {
+    type: 'bar',
+    data: {
+      labels: [{% for s in loads_status_month %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+      datasets: [{
+        label: 'Status Month',
+        data: [{% for s in loads_status_month %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+      }]
+    },
+    options: getChartOptions()
+  });
+
+  new Chart(document.getElementById('statusWeekChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ status_by_week.labels|safe }},
+      datasets: [{
+        label: 'Status Week',
+        data: {{ status_by_week.datasets.0.data|safe }},
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+      }]
+    },
+    options: getChartOptions()
+  });
 </script>
 {% endblock %}
