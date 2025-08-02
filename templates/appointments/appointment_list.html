@@ -6,34 +6,30 @@
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
     <h2 class="mb-0">Appointments</h2>
 
-    <!-- Formulário com campos à esquerda e botões à direita -->
-    <form method="get" class="w-100 d-flex flex-wrap justify-content-between align-items-center gap-2">
-      <!-- Inputs: date + PO -->
-      <div class="d-flex flex-grow-1 gap-2">
+    <div class="w-100 d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <form method="get" class="d-flex flex-grow-1 gap-2 align-items-center">
         <input type="date" id="date" name="date"
                class="form-control form-control-sm"
                value="{{ data_filter|date:'Y-m-d' }}">
         <input type="text" id="po" name="po" placeholder="Search P.O"
                class="form-control form-control-sm"
                value="{{ request.GET.po }}">
-      </div>
-
-      <!-- Botões: Filter, Clear, Upload, Export, Add -->
-      <div class="d-flex gap-2 flex-wrap justify-content-end">
         <button type="submit" class="btn btn-sm px-2" style="background-color: #007bff; color: white;">🔍 Filter</button>
         <a href="{% url 'appointment_list' %}" class="btn btn-sm px-2" style="background-color: #6c757d; color: white;">🧹 Clear</a>
+      </form>
 
-        <form method="post" enctype="multipart/form-data" action="{% url 'import_appointments_csv' %}" class="d-flex align-items-center gap-2">
-          {% csrf_token %}
-          <input type="file" name="file" class="form-control form-control-sm" required style="max-width: 200px;">
-          <button type="submit" class="btn btn-secondary btn-sm px-2">📥 Upload</button>
-        </form>
+      <form method="post" enctype="multipart/form-data" action="{% url 'import_appointments_csv' %}" class="d-flex gap-2 align-items-center">
+        {% csrf_token %}
+        <input type="file" name="file" class="form-control form-control-sm" required style="max-width: 200px;">
+        <button type="submit" class="btn btn-secondary btn-sm px-2">📥 Upload</button>
+      </form>
 
+      <div class="d-flex gap-2">
         <a href="{% url 'export_appointments_csv' %}?date={{ request.GET.date }}" class="btn btn-success btn-sm px-2">📤 Export</a>
         <a href="{% url 'add_appointment' %}" class="btn btn-info btn-sm px-2">🚚 Add Load</a>
         <a href="{% url 'add_checker' %}" class="btn btn-warning btn-sm px-2">➕ Add Checker</a>
       </div>
-    </form>
+    </div>
   </div>
 
   <!-- KPIs -->
