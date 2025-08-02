@@ -109,7 +109,23 @@
     };
   }
 
-  function renderBarChart(id, labels, data, label) {
+  function getColorArrayFromLabels(labels) {
+    const colorMap = {
+      'On Time': '#28a745',
+      'Rescheduled': '#ffc107',
+      'Canceled': '#fd7e14',
+      'No Show Up': '#dc3545'
+    };
+    return labels.map(label => colorMap[label] || '#007bff');
+  }
+
+  function getColorArray(count) {
+    const baseColors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'];
+    return Array.from({length: count}, (_, i) => baseColors[i % baseColors.length]);
+  }
+
+  function renderBarChart(id, labels, data, label, useStatusColors = false) {
+    const backgroundColor = useStatusColors ? getColorArrayFromLabels(labels) : getColorArray(data.length);
     new Chart(document.getElementById(id), {
       type: 'bar',
       data: {
@@ -117,7 +133,7 @@
         datasets: [{
           label: label,
           data: data,
-          backgroundColor: 'rgba(54, 162, 235, 0.7)'
+          backgroundColor: backgroundColor
         }]
       },
       options: getChartOptions()
@@ -128,8 +144,8 @@
   renderBarChart('checkerChartWeek', [{% for c in checker_week %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_week %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week');
   renderBarChart('checkerChartDay', [{% for c in checker_day %}'{{ c.checker__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for c in checker_day %}{{ c.total }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Day');
 
-  renderBarChart('statusDayChart', [{% for s in loads_status_day %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_day %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Today');
-  renderBarChart('statusWeekChart', [{% for s in loads_status_week %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_week %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week');
-  renderBarChart('statusMonthChart', [{% for s in loads_status_month %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_month %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Month');
+  renderBarChart('statusDayChart', [{% for s in loads_status_day %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_day %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Today', true);
+  renderBarChart('statusWeekChart', [{% for s in loads_status_week %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_week %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Week', true);
+  renderBarChart('statusMonthChart', [{% for s in loads_status_month %}'{{ s.status_load|title }}'{% if not forloop.last %}, {% endif %}{% endfor %}], [{% for s in loads_status_month %}{{ s.count }}{% if not forloop.last %}, {% endif %}{% endfor %}], 'Month', true);
 </script>
 {% endblock %}
