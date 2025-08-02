@@ -1,3 +1,8 @@
+from django.db.models import Sum, Count
+from django.utils.timezone import now
+from django.utils.dateparse import parse_date
+from datetime import timedelta
+from .models import Appointment
 from django.utils.dateparse import parse_date, parse_time
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -168,39 +173,88 @@ def appointment_table_partial(request):
         })
     })
 
-from datetime import date, timedelta
-from django.db.models import Sum
-from .models import Appointment  # ajuste conforme seu app
 
+@login_required
 def dashboard_view(request):
-    today = date.today()
+    date_str = request.GET.get('date')
+    selected_date = parse_date(date_str) if date_str else now().date()
 
-    # Começo da semana: segunda-feira
-    start_of_week = today - timedelta(days=today.weekday())
-    # Fim da semana: sábado (segunda + 5 dias)
+    year = selected_date.year
+    month = selected_date.month
+
+    # Semana atual: segunda (weekday 0) até sábado (weekday 5)
+    start_of_week = selected_date - timedelta(days=selected_date.weekday())
     end_of_week = start_of_week + timedelta(days=5)
 
-    # Soma dos pallets agendados entre segunda e sábado da semana atual
-    pallets_week = Appointment.objects.filter(
-        scheduled_date__range=[start_of_week, end_of_week]
-    ).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-
-    # Exemplo das outras métricas já existentes
-    pallets_today = Appointment.objects.filter(scheduled_date=today).aggregate(total=Sum('qtd_pallet'))['total'] or 0
-    pallets_month = Appointment.objects.filter(scheduled_date__month=today.month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    # Pallets
+    pallets_today = Appointment.objects.filter(scheduled_date=selected_date).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    pallets_week = Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week)).aggregate(total=Sum('qtd_pallet'))['total'] or 0
+    pallets_month = Appointment.objects.filter(scheduled_date__year=year, scheduled_date__month=month).aggregate(total=Sum('qtd_pallet'))['total'] or 0
     pallets_total = Appointment.objects.aggregate(total=Sum('qtd_pallet'))['total'] or 0
 
+    # Pallets por checker - semanal
+    checker_week = (
+        Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
+        .values('checker__name')
+        .annotate(total=Sum('qtd_pallet'))
+        .order_by('-total')
+    )
+
+    # Pallets por checker - diário na semana
+    checker_day_data = {}
+    for i in range(6):  # Segunda a Sábado
+        day = start_of_week + timedelta(days=i)
+        for entry in Appointment.objects.filter(scheduled_date=day).values('checker__name').annotate(total=Sum('qtd_pallet')):
+            name = entry['checker__name'] or 'No Checker'
+            checker_day_data.setdefault(name, [0] * 6)[i] = entry['total']
+
+    checker_day_chart = {
+        'labels': [f"{(start_of_week + timedelta(days=i)).strftime('%a')}" for i in range(6)],
+        'datasets': [
+            {
+                'label': name,
+                'data': values
+            } for name, values in checker_day_data.items()
+        ]
+    }
+
+    # Gráfico de checker semanal
+    checker_week_chart = {
+        'labels': [entry['checker__name'] or 'No Checker' for entry in checker_week],
+        'datasets': [{
+            'label': 'Pallets',
+            'data': [entry['total'] for entry in checker_week]
+        }]
+    }
+
+    # Loads por status na semana
+    loads_status_week = (
+        Appointment.objects.filter(scheduled_date__range=(start_of_week, end_of_week))
+        .values('status_load')
+        .annotate(count=Count('id'))
+    )
+
+    status_chart = {
+        'labels': [entry['status_load'].capitalize() for entry in loads_status_week],
+        'datasets': [{
+            'label': 'Loads',
+            'data': [entry['count'] for entry in loads_status_week]
+        }]
+    }
+
     context = {
-        'pallets_week': pallets_week,
+        'selected_date': selected_date,
         'pallets_today': pallets_today,
+        'pallets_week': pallets_week,
         'pallets_month': pallets_month,
         'pallets_total': pallets_total,
 
-        # Dados dos gráficos
-        'status_by_week': {},  # substitua depois
-        'checker_day_data': {},
-        'checker_week_data': {},
+        # Gráficos
+        'status_by_week': status_chart,
+        'checker_day_data': checker_day_chart,
+        'checker_week_data': checker_week_chart,
     }
+
     return render(request, 'appointments/dashboard.html', context)
 
 # @login_required
